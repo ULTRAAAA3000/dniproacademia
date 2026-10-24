@@ -1,0 +1,3 @@
+ADMIN_PASSWORD=змініть-цей-пароль
+ADMIN_EMAIL=admin@example.com
+MAIL_DEBUG=1

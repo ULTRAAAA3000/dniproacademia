@@ -1,0 +1,12 @@
+name = "dniproacademia"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dniproacademia"
+database_id = "ВСТАВТЕ_ID_БАЗИ_D1"
+
+[[r2_buckets]]
+binding = "FILES"
+bucket_name = "dniproacademia-files"
