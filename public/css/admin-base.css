@@ -1,0 +1,25 @@
+*{box-sizing:border-box}
+body{margin:0;background:#f0f0f1;font-family:'Manrope',system-ui,sans-serif;color:#1d2327;font-size:14px}
+.da-admin-wrap{max-width:1300px;margin:0 auto;padding:20px}
+.da-admin-top{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.notice{background:#fff;border-left:4px solid #1a7a4a;box-shadow:0 1px 1px rgba(0,0,0,.04);margin:12px 0;padding:4px 12px}
+.button{display:inline-block;padding:5px 12px;border:1px solid #2271b1;border-radius:4px;background:#f6f7f7;color:#2271b1;font-size:13px;cursor:pointer;text-decoration:none}
+.da-login-box{max-width:360px;margin:12vh auto;background:#fff;border-radius:10px;padding:28px;box-shadow:0 4px 24px rgba(0,0,0,.08)}
+.da-login-box h1{font-size:20px;margin:0 0 18px}
+.da-login-box label{display:block;font-size:13px;font-weight:600;margin-bottom:6px}
+.da-login-box .da-input{width:100%;margin-bottom:14px}
+.da-login-error{background:#fff0ef;border:1px solid #e74c3c;color:#7b241c;border-radius:6px;padding:8px 12px;margin-bottom:14px;font-size:13px}
+.da-audit-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center}
+.da-audit-filters select{padding:5px 10px;border-radius:6px;border:1px solid #ddd;font-size:13px}
+.da-audit-table{width:100%;border-collapse:collapse;font-size:13px}
+.da-audit-table th{background:#f2faf9;padding:9px 12px;text-align:left;font-weight:700;border-bottom:2px solid #deecea;white-space:nowrap}
+.da-audit-table td{padding:8px 12px;border-bottom:1px solid #f0f0f0;vertical-align:middle}
+.da-audit-table tr:hover td{background:#fafffe}
+.da-audit-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap}
+.da-audit-entity{display:inline-block;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;background:#f0f0f0;color:#555}
+.da-audit-details{color:#555;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+.da-audit-ip{font-size:11px;color:#aaa;font-family:monospace}
+.da-audit-pagination{display:flex;gap:6px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.da-audit-pagination a,.da-audit-pagination span{padding:4px 10px;border-radius:5px;border:1px solid #ddd;font-size:12px;text-decoration:none;color:#333}
+.da-audit-pagination .current{background:#1a7a4a;color:#fff;border-color:#1a7a4a}
+.da-audit-empty{color:#aaa;font-style:italic;padding:20px 0;text-align:center}
