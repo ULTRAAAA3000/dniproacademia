@@ -1,0 +1,9 @@
+html,body{margin:0;padding:0}
+body{font-family:'Manrope',system-ui,sans-serif}
+.da-notice{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:10000;max-width:440px;width:calc(100% - 32px);border-radius:10px;padding:14px 20px;font-size:14px;text-align:center}
+.da-notice--ok{background:#f0faf7;border:1.5px solid #1a6b5a;color:#1a4a38}
+.da-notice--bad{background:#fff0ef;border:1.5px solid #e74c3c;color:#7b241c}
+#da-chat-btn:hover{background:#f2faf9 !important;border-color:#1a6b5e !important;color:#1a6b5e !important}
+.da-view-tabs{display:none}
+.da-toast{position:fixed;top:20px;right:20px;z-index:99999;padding:10px 18px;color:#fff;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+#da-settings-drawer:not(.open){box-shadow:none}

@@ -1,0 +1,271 @@
+.da-auth-page{
+  position:fixed;inset:0;
+  background:#0b1e1a;
+  background-image:
+    radial-gradient(ellipse 70% 60% at 15% 20%,rgba(26,107,94,.32) 0%,transparent 70%),
+    radial-gradient(ellipse 50% 70% at 85% 80%,rgba(14,61,53,.5) 0%,transparent 70%);
+  display:flex;align-items:center;justify-content:center;
+  z-index:9990;
+  font-family:'Manrope',system-ui,sans-serif;
+}
+.da-particles{
+  position:fixed;inset:0;
+  z-index:9991;
+  pointer-events:none;
+  overflow:hidden;
+}
+.da-p{
+  position:absolute;
+  bottom:-80px;
+  border-radius:50%;
+  background:rgba(26,107,94,.18);
+  animation:daFloat linear infinite;
+}
+@keyframes daFloat{
+  0%  {transform:translateY(0);opacity:0}
+  8%  {opacity:1}
+  90% {opacity:.9}
+  100%{transform:translateY(-105vh);opacity:0}
+}
+.da-auth-wrap{
+  position:relative;
+  z-index:9992;
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  width:100%;
+}
+.da-auth-card{
+  background:#fff;
+  border-radius:18px;
+  padding:40px 36px;
+  width:100%;max-width:440px;
+  box-shadow:0 24px 80px rgba(0,0,0,.28);
+  animation:daSlideUp .4s cubic-bezier(.16,1,.3,1) forwards;
+  transition:box-shadow .25s;
+}
+.da-auth-card:hover{
+  box-shadow:0 32px 96px rgba(0,0,0,.32),0 0 0 1px rgba(26,107,94,.1);
+}
+@keyframes daSlideUp{
+  from{opacity:0;transform:translateY(28px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.da-back-btn{
+  position:fixed;
+  bottom:28px;left:50%;transform:translateX(-50%);
+  z-index:9993;
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 18px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:100px;
+  color:rgba(255,255,255,.55);
+  font-size:12.5px;font-weight:600;
+  cursor:pointer;text-decoration:none;
+  font-family:inherit;
+  transition:color .18s,border-color .18s,background .18s;
+}
+.da-back-btn:hover{
+  color:rgba(255,255,255,.9);
+  border-color:rgba(255,255,255,.45);
+  background:rgba(255,255,255,.06);
+  text-decoration:none;
+}
+.da-back-btn svg{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.da-auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:26px;justify-content:center}
+.da-auth-logo-icon{
+  width:44px;height:44px;background:#1a6b5e;border-radius:11px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:Georgia,serif;font-size:15px;font-weight:600;color:#fff;
+  transition:transform .2s,box-shadow .2s;cursor:default;
+}
+.da-auth-logo-icon:hover{transform:scale(1.08) rotate(-2deg);box-shadow:0 4px 16px rgba(26,107,94,.45)}
+.da-auth-logo-text{font-size:17px;font-weight:700;color:#0d1f1c;letter-spacing:-.2px}
+.da-auth-title{
+  font-family:Georgia,serif;font-size:26px;font-weight:600;
+  color:#0d1f1c;margin-bottom:26px;text-align:center;letter-spacing:-.3px;
+}
+#da-auth .da-field{position:relative;margin-bottom:16px}
+#da-auth .da-field-input,
+.da-auth-wrap .da-field-input{
+  width:100% !important;
+  height:58px !important;
+  padding:28px 14px 6px !important;
+  border:1.5px solid #deecea !important;
+  border-radius:9px !important;
+  font-size:15px !important;
+  font-family:inherit !important;
+  color:#0d1f1c !important;
+  background-color:#fff !important;
+  -webkit-box-shadow:0 0 0 100px #fff inset !important;
+  box-shadow:0 0 0 100px #fff inset !important;
+  -webkit-text-fill-color:#0d1f1c !important;
+  transition:border-color .18s,box-shadow .18s !important;
+  outline:none !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  display:block !important;
+  margin:0 !important;
+  line-height:normal !important;
+  position:relative !important;
+  z-index:1 !important;
+}
+#da-auth .da-field-input:-webkit-autofill,
+.da-field-input:-webkit-autofill:hover,
+.da-field-input:-webkit-autofill:focus{
+  -webkit-box-shadow:0 0 0 100px #fff inset !important;
+  -webkit-text-fill-color:#0d1f1c !important;
+  transition:background-color 9999s ease !important;
+}
+#da-auth .da-field-input:hover{border-color:#a3bfbb}
+#da-auth .da-field-input:focus{
+  border-color:#1a6b5e;
+  box-shadow:0 0 0 3px rgba(26,107,94,.14),0 0 0 100px #fff inset !important;
+  -webkit-box-shadow:0 0 0 3px rgba(26,107,94,.14),0 0 0 100px #fff inset !important;
+}
+#da-auth .da-field-label{
+  position:absolute !important;
+  left:14px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  font-size:14px !important;
+  font-weight:500 !important;
+  color:#a3bfbb !important;
+  pointer-events:none !important;
+  transition:top .18s,font-size .18s,color .18s,transform .18s,letter-spacing .18s !important;
+  line-height:1 !important;
+  z-index:2 !important;
+  background:transparent !important;
+  margin:0 !important;
+  padding:0 !important;
+}
+#da-auth .da-field-input:focus ~ .da-field-label,
+#da-auth .da-field-input:not(:placeholder-shown) ~ .da-field-label{
+  top:9px !important;
+  transform:translateY(0) !important;
+  font-size:10px !important;
+  font-weight:800 !important;
+  color:#1a6b5e !important;
+  letter-spacing:.6px !important;
+  text-transform:uppercase !important;
+}
+#da-auth .da-fey-wrap{position:relative}
+#da-auth .da-fey-wrap .da-field-input{padding-right:46px !important}
+#da-auth .da-field-eye{
+  position:absolute !important;
+  right:11px !important;
+  top:50% !important;
+  transform:translateY(-50%) !important;
+  width:32px !important;
+  height:32px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  background:transparent !important;
+  background-color:transparent !important;
+  background-image:none !important;
+  border:none !important;
+  border-radius:6px !important;
+  cursor:pointer !important;
+  color:#a3bfbb !important;
+  padding:0 !important;
+  margin:0 !important;
+  box-shadow:none !important;
+  outline:none !important;
+  -webkit-appearance:none !important;
+  appearance:none !important;
+  transition:color .16s,background-color .16s !important;
+  z-index:10 !important;
+  pointer-events:all !important;
+}
+#da-auth .da-field-eye:hover{color:#1a6b5e !important;background-color:rgba(26,107,94,.08) !important}
+#da-auth .da-field-eye:focus,
+#da-auth .da-field-eye:active{outline:none !important;box-shadow:none !important;border:none !important}
+#da-auth .da-field-eye svg{stroke:currentColor !important;fill:none !important;pointer-events:none !important;display:block !important;}
+#da-auth .da-form-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+#da-auth .da-btn-primary{
+  width:100%;padding:14px;
+  background:#1a6b5e !important;background-image:none !important;
+  color:#fff !important;border:none !important;border-radius:9px;
+  font-size:15px;font-weight:700;cursor:pointer;
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-family:inherit;-webkit-appearance:none !important;appearance:none !important;
+  box-shadow:none !important;text-shadow:none;
+  transition:background-color .18s,box-shadow .18s,transform .12s;
+}
+#da-auth .da-btn-primary:hover{
+  background:#15574c !important;background-image:none !important;
+  box-shadow:0 6px 22px rgba(26,107,94,.38) !important;
+  transform:translateY(-1px);color:#fff !important;border:none !important;
+}
+#da-auth .da-btn-primary:active{transform:translateY(1px);box-shadow:none !important}
+#da-auth .da-btn-primary:focus{outline:none !important;box-shadow:0 0 0 3px rgba(26,107,94,.3) !important}
+#da-auth .da-btn-primary:disabled{opacity:.7;cursor:not-allowed;transform:none}
+#da-auth .da-ripple{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,.28);
+  transform:scale(0);
+  animation:daRipple .55s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes daRipple{to{transform:scale(4);opacity:0}}
+#da-auth .da-auth-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:18px 0;color:#a3bfbb;font-size:12.5px;
+}
+#da-auth .da-auth-divider::before,
+#da-auth .da-auth-divider::after{
+  content:'';flex:1;height:1px;background:#e5eeed;
+}
+#da-auth .da-auth-links{display:flex;justify-content:space-between;align-items:center}
+#da-auth .da-link{
+  background:transparent !important;background-image:none !important;
+  border:none !important;border-radius:0 !important;
+  color:#1a6b5e !important;font-size:13px;font-weight:600;
+  cursor:pointer;padding:2px 0;
+  font-family:inherit;-webkit-appearance:none !important;appearance:none !important;
+  box-shadow:none !important;text-decoration:none;
+  position:relative;display:inline-block;
+  transition:color .18s,transform .12s;
+}
+#da-auth .da-link::after{
+  content:'';position:absolute;bottom:-1px;left:0;right:0;
+  height:1.5px;background:#1a6b5e;
+  transform:scaleX(0);transform-origin:center;
+  transition:transform .2s;
+}
+#da-auth .da-link:hover{
+  color:#0e3d35 !important;background:transparent !important;
+  background-image:none !important;border:none !important;
+  box-shadow:none !important;transform:translateY(-1px);
+}
+#da-auth .da-link:hover::after{transform:scaleX(1)}
+#da-auth .da-link:focus,
+#da-auth .da-link:active{
+  outline:none !important;box-shadow:none !important;
+  background:transparent !important;border:none !important;
+}
+#da-auth .da-alert{
+  padding:11px 14px;border-radius:8px;
+  font-size:13px;font-weight:500;margin-bottom:14px;line-height:1.5;
+}
+#da-auth .da-alert--error{background:#fdf3f2;border:1px solid #f5c6c2;color:#c0392b}
+#da-auth .da-alert--success{background:#f2faf9;border:1px solid #deecea;color:#1a6b5e}
+#da-auth .da-spinner{
+  width:16px;height:16px;
+  border:2px solid rgba(255,255,255,.3);border-top-color:#fff;
+  border-radius:50%;animation:daSpin .7s linear infinite;flex-shrink:0;
+}
+@keyframes daSpin{to{transform:rotate(360deg)}}
+#da-auth .da-step-dots{display:flex;justify-content:center;gap:7px;margin-bottom:22px}
+#da-auth .da-step-dot{
+  width:8px;height:8px;border-radius:50%;background:#e5eeed;
+  transition:background .22s,transform .22s;
+}
+#da-auth .da-step-dot.active{background:#1a6b5e;transform:scale(1.3)}
+@media(max-width:480px){
+  .da-auth-card{padding:28px 16px}
+  .da-form-row2{grid-template-columns:1fr}
+  .da-back-btn{bottom:16px}
+}
