@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "include": ["/da-login", "/da-login/*", "/da-cabinet", "/da-cabinet/*", "/admin", "/admin/*", "/api/*", "/files/*"],
+  "exclude": []
+}
