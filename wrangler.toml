@@ -5,8 +5,8 @@ pages_build_output_dir = "public"
 [[d1_databases]]
 binding = "DB"
 database_name = "dniproacademia"
-database_id = "ВСТАВТЕ_ID_БАЗИ_D1"
+database_id = "519e22f3-e1bd-4e67-9ef4-23b3c1db1b1c"
 
 [[r2_buckets]]
 binding = "FILES"
-bucket_name = "dniproacademia-files"
+bucket_name = "dniproacademia"
