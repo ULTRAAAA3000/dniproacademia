@@ -25,7 +25,6 @@ const ENTITY_LABELS: Record<string, string> = {
   grade: "Оцінка",
   final_grade: "Підсумкова",
   material: "Матеріал",
-  news: "Новина",
   user: "Користувач",
   class: "Клас",
   subject: "Предмет",
@@ -34,7 +33,6 @@ const ENTITY_LABELS: Record<string, string> = {
 
 const FAIL_LABELS: Record<string, [string, string]> = {
   bad_password: ["Невірний пароль", "#d68910"],
-  bad_otp: ["Невірний код 2FA", "#8e44ad"],
   user_not_found: ["Акаунт не знайдено", "#2980b9"],
   bad_recovery: ["Невірне кодове слово", "#d35400"],
   admin_bad_password: ["Невірний пароль адміна", "#c0392b"],
@@ -145,7 +143,6 @@ async function classDetail(env: Env, classId: number): Promise<string> {
   const students = await db.getClassMembers(env.DB, classId, "student");
   const teachers = await db.getClassMembers(env.DB, classId, "teacher");
   const subjects = await db.getClassSubjects(env.DB, classId);
-  const news = await db.getNews(env.DB, classId);
 
   let html = '<div class="da-class-detail"><div class="da-detail-section"><h3>Предмети</h3><div class="da-chip-list">';
   for (let i = 0; i < subjects.length; i++) {
@@ -167,20 +164,6 @@ async function classDetail(env: Env, classId: number): Promise<string> {
   html +=
     '</ul><div class="da-inline-form"><input type="email" class="da-input" id="add-teacher-' + classId + '" placeholder="Email вчителя">' +
     '<button class="da-btn da-btn--teal" data-action="add_member" data-cid="' + classId + '" data-role="teacher">Додати</button></div></div>';
-
-  html += '<div class="da-detail-section"><h3>Новини класу</h3><div class="da-news-admin-list" id="news-list-' + classId + '">';
-  for (let i = 0; i < news.length; i++) {
-    const n = news[i];
-    html +=
-      '<div class="da-news-admin-item" id="anews-' + n.id + '"><div class="da-news-admin-title">' + esc(n.title) + "</div>" +
-      '<div class="da-news-admin-meta">' + esc(n.author_name) + " · " + fmtDateTime(n.created_at) + "</div>" +
-      '<button class="da-btn da-btn--xs da-btn--red da-admin-del-news" data-id="' + n.id + '" data-cid="' + classId + '">Видалити</button></div>';
-  }
-  if (news.length === 0) html += '<div class="da-empty">Новин ще немає.</div>';
-  html +=
-    '</div><div class="da-news-admin-form" style="margin-top:10px;"><input type="text" class="da-input da-news-title-inp" placeholder="Тема" id="news-title-' + classId + '" style="margin-bottom:6px;">' +
-    '<textarea class="da-input" rows="2" placeholder="Текст новини..." id="news-body-' + classId + '" style="margin-bottom:6px;resize:vertical;"></textarea>' +
-    '<button class="da-btn da-btn--teal da-admin-add-news" data-cid="' + classId + '">Опублікувати</button></div></div>';
 
   html += '<div class="da-detail-section"><h3>Учні</h3><ul class="da-member-list">';
   for (let i = 0; i < students.length; i++) {
@@ -291,9 +274,6 @@ async function tabSettings(env: Env, url: URL): Promise<string> {
   const chatDays = parseInt(await db.getSetting(env.DB, "chat_cleanup_days", "60"), 10);
   const lastCleanup = await db.getSetting(env.DB, "last_cleanup", "—");
   const lastCount = parseInt(await db.getSetting(env.DB, "last_cleanup_count", "0"), 10);
-  const twofa = await db.getSetting(env.DB, "2fa_enabled", "1");
-  const otpMax = parseInt(await db.getSetting(env.DB, "otp_max_attempts", "3"), 10) || 3;
-  const otpLock = parseInt(await db.getSetting(env.DB, "otp_lockout_mins", "5"), 10) || 5;
 
   let notice = "";
   if (url.searchParams.get("saved")) notice = '<div class="notice notice-success"><p>Налаштування збережено.</p></div>';
@@ -322,14 +302,6 @@ async function tabSettings(env: Env, url: URL): Promise<string> {
     '</div><div style="background:#f2faf9;border:1px solid #deecea;border-radius:8px;padding:12px 16px;font-size:13px;color:#2d4742;line-height:1.7;">' +
     "<strong>Як це працює:</strong><br><strong>Здачі ДЗ</strong> — старі файли видаляються через N днів. Запис про здачу та оцінку <em>зберігається</em> назавжди.<br>" +
     "<strong>Матеріали вчителів</strong> — docx/pptx вже є стиснутими форматами. Ці файли <em>не видаляються автоматично</em>.</div></div>" +
-
-    '<div class="da-section"><h2 class="da-section-title">Двофакторна аутентифікація (2FA)</h2><table class="da-settings-table">' +
-    '<tr><td class="da-settings-label">Увімкнути 2FA при вході</td><td><label class="da-toggle"><input type="checkbox" name="2fa_enabled" ' + checked(twofa) + '><span class="da-toggle-slider"></span></label>' +
-    '<span class="da-settings-hint">Якщо вимкнено — код на пошту не відправляється, вхід одразу після пароля.</span></td></tr>' +
-    '<tr><td class="da-settings-label">Максимальна кількість спроб введення коду</td><td><input type="number" name="otp_max_attempts" value="' + otpMax + '" min="1" max="10" class="da-input" style="width:80px"><span class="da-settings-hint">Після цього входи блокуються. Рекомендовано: 3.</span></td></tr>' +
-    '<tr><td class="da-settings-label">Час блокування після вичерпання спроб (хвилин)</td><td><input type="number" name="otp_lockout_mins" value="' + otpLock + '" min="1" max="60" class="da-input" style="width:80px"><span class="da-settings-hint">Рекомендовано: 5.</span></td></tr></table>' +
-    '<div style="background:#f0faf7;border:1px solid #c8e8e0;border-radius:8px;padding:12px 16px;font-size:13px;color:#2d4742;line-height:1.7;margin-top:12px;">Код складається з <strong>3 цифр</strong>, дійсний <strong>10 хвилин</strong>.<br>Після ' +
-    otpMax + " невдалих спроб — блокування на " + otpLock + " хв.</div></div>" +
 
     '<div class="da-section"><h2 class="da-section-title">Завантаження файлів</h2><table class="da-settings-table"><tr><td class="da-settings-label">Максимальний розмір файлу (МБ)</td><td>' +
     '<input type="number" name="max_file_size" value="' + maxSize + '" min="1" max="100" class="da-input" style="width:100px"><span class="da-settings-hint">Рекомендовано: 15 МБ.</span></td></tr></table></div>' +

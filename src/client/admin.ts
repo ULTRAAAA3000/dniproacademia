@@ -175,42 +175,6 @@ async function handleAction(button: HTMLElement): Promise<void> {
   }
 }
 
-async function addNews(button: HTMLElement): Promise<void> {
-  const cid = button.dataset.cid || "";
-  const title = value("news-title-" + cid).trim();
-  const body = value("news-body-" + cid).trim();
-  if (!title || !body) {
-    toast("Заповніть тему та текст", false);
-    return;
-  }
-  const r = await request("admin_add_news", { cid: cid, title: title, body: body });
-  if (r.ok) {
-    toast("Новину опубліковано");
-    const list = byId("news-list-" + cid);
-    if (list) {
-      const empty = list.querySelector(".da-empty");
-      if (empty) empty.remove();
-      list.insertAdjacentHTML("afterbegin", r.html);
-    }
-    (byId("news-title-" + cid) as HTMLInputElement).value = "";
-    (byId("news-body-" + cid) as HTMLTextAreaElement).value = "";
-  } else {
-    toast(r.msg || "Помилка", false);
-  }
-}
-
-async function deleteNews(button: HTMLElement): Promise<void> {
-  if (!confirm("Видалити новину?")) return;
-  const id = button.dataset.id || "";
-  const r = await request("admin_delete_news", { id: id });
-  if (r.ok) {
-    toast("Видалено");
-    byId("anews-" + id)?.remove();
-  } else {
-    toast(r.msg || "Помилка", false);
-  }
-}
-
 const modal = byId("da-schedule-modal");
 
 document.addEventListener("click", (e) => {
@@ -255,17 +219,6 @@ document.addEventListener("click", (e) => {
       }
     });
     return;
-  }
-
-  const addNewsButton = target.closest<HTMLElement>(".da-admin-add-news");
-  if (addNewsButton) {
-    addNews(addNewsButton);
-    return;
-  }
-
-  const deleteNewsButton = target.closest<HTMLElement>(".da-admin-del-news");
-  if (deleteNewsButton) {
-    deleteNews(deleteNewsButton);
   }
 });
 

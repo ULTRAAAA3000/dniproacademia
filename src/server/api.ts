@@ -108,7 +108,7 @@ async function formatMessage(env: Env, m: MessageRow) {
 async function handleLogin(ctx: Ctx, form: FormData): Promise<Response> {
   const email = cleanEmail(str(form, "email"));
   const password = str(form, "password");
-  const result = await auth.loginStep1(ctx.env, ctx.request, email, password);
+  const result = await auth.login(ctx.env, ctx.request, email, password);
   return finishLogin(ctx, result);
 }
 
@@ -121,13 +121,6 @@ function finishLogin(ctx: Ctx, result: auth.LoginResult): Response {
     ctx.waitUntil(maybeDailyCleanup(ctx.env));
   }
   return response;
-}
-
-async function handleVerifyOtp(ctx: Ctx, form: FormData): Promise<Response> {
-  const email = cleanEmail(str(form, "email"));
-  const code = cleanText(str(form, "code"));
-  const result = await auth.loginStep2(ctx.env, ctx.request, email, code);
-  return finishLogin(ctx, result);
 }
 
 async function checkCaptcha(env: Env, token: string, ip: string): Promise<string> {
@@ -462,45 +455,6 @@ async function handleDeleteMaterial(ctx: Ctx, form: FormData, user: User): Promi
   return jsonResponse({ ok: true });
 }
 
-async function handleAddNews(ctx: Ctx, form: FormData, user: User): Promise<Response> {
-  if (user.role !== "teacher") return denied();
-  const classId = toInt(str(form, "class_id"));
-  const title = cleanText(str(form, "title"));
-  const body = cleanArea(str(form, "body"));
-  if (!title || !body) return fail("Заповніть тему та текст.");
-  if (!classId) return fail("Не вказано клас.");
-  if (!(await canUseClass(ctx.env, user, classId))) return denied();
-
-  const res = await ctx.env.DB
-    .prepare("INSERT INTO news (class_id, author_id, author_type, title, body, created_at) VALUES (?, ?, 'teacher', ?, ?, ?)")
-    .bind(classId, user.id, title, body, nowSql())
-    .run();
-  return jsonResponse({ ok: true, id: res.meta.last_row_id });
-}
-
-async function handleDeleteNews(ctx: Ctx, form: FormData, user: User): Promise<Response> {
-  if (user.role !== "teacher") return denied();
-  const id = toInt(str(form, "news_id"));
-  const item = await ctx.env.DB
-    .prepare("SELECT id FROM news WHERE id = ? AND author_id = ? AND author_type = 'teacher'")
-    .bind(id, user.id)
-    .first();
-  if (!item) return fail("Не знайдено або немає прав.");
-
-  await ctx.env.DB.prepare("DELETE FROM news_read WHERE news_id = ?").bind(id).run();
-  await ctx.env.DB.prepare("DELETE FROM news WHERE id = ?").bind(id).run();
-  await db.auditLog(ctx.env.DB, actorOf(user), "delete", "news", id, "Новина #" + id, getIp(ctx.request));
-  return jsonResponse({ ok: true });
-}
-
-async function handleMarkNewsRead(ctx: Ctx, form: FormData, user: User): Promise<Response> {
-  const classId = toInt(str(form, "class_id"));
-  if (user.role !== "student") return jsonResponse({ ok: true });
-  if (!(await canUseClass(ctx.env, user, classId))) return denied();
-  await db.markNewsRead(ctx.env.DB, classId, user.id);
-  return jsonResponse({ ok: true });
-}
-
 async function handleChatList(ctx: Ctx, user: User): Promise<Response> {
   const chats = await db.getUserChats(ctx.env.DB, user.id);
   const result = [];
@@ -730,9 +684,6 @@ const userHandlers: Record<string, UserHandler> = {
   get_materials: handleGetMaterials,
   upload_material: handleUploadMaterial,
   delete_material: handleDeleteMaterial,
-  add_news: handleAddNews,
-  delete_news: handleDeleteNews,
-  mark_news_read: handleMarkNewsRead,
   chat_list: (ctx, form, user) => handleChatList(ctx, user),
   chat_search: handleChatSearch,
   chat_open: handleChatOpen,
@@ -751,7 +702,6 @@ type PublicHandler = (ctx: Ctx, form: FormData) => Promise<Response>;
 
 const publicHandlers: Record<string, PublicHandler> = {
   login: handleLogin,
-  verify_otp: handleVerifyOtp,
   register: handleRegister,
   verify_email: handleVerifyEmail,
   check_email: handleCheckEmail,
@@ -940,32 +890,6 @@ export async function handleAdminApi(ctx: Ctx, name: string): Promise<Response> 
     return jsonResponse({ ok: true });
   }
 
-  if (name === "admin_add_news") {
-    const cid = toInt(str(form, "cid"));
-    const title = cleanText(str(form, "title"));
-    const body = cleanArea(str(form, "body"));
-    if (!title || !body || !cid) return fail("Заповніть всі поля");
-    const created = nowSql();
-    const res = await env.DB
-      .prepare("INSERT INTO news (class_id, author_id, author_type, title, body, created_at) VALUES (?, 0, 'admin', ?, ?, ?)")
-      .bind(cid, title, body, created)
-      .run();
-    const newId = res.meta.last_row_id;
-    const html =
-      '<div class="da-news-admin-item" id="anews-' + newId + '">' +
-      '<div class="da-news-admin-title">' + esc(title) + "</div>" +
-      '<div class="da-news-admin-meta">Адміністрація · ' + fmtDate(created) + " " + fmtTime(created) + "</div>" +
-      '<button class="da-btn da-btn--xs da-btn--red da-admin-del-news" data-id="' + newId + '" data-cid="' + cid + '">Видалити</button></div>';
-    return jsonResponse({ ok: true, id: newId, html: html });
-  }
-
-  if (name === "admin_delete_news") {
-    const id = toInt(str(form, "id"));
-    await env.DB.prepare("DELETE FROM news_read WHERE news_id = ?").bind(id).run();
-    await env.DB.prepare("DELETE FROM news WHERE id = ?").bind(id).run();
-    return jsonResponse({ ok: true });
-  }
-
   if (name === "ip_blacklist_add") {
     const target = cleanText(str(form, "ip"));
     const reason = cleanText(str(form, "reason"));
@@ -984,12 +908,6 @@ export async function handleAdminApi(ctx: Ctx, name: string): Promise<Response> 
   }
 
   if (name === "save_settings") {
-    let otpMax = toInt(str(form, "otp_max_attempts")) || 3;
-    if (otpMax < 1) otpMax = 1;
-    if (otpMax > 10) otpMax = 10;
-    let otpLock = toInt(str(form, "otp_lockout_mins")) || 5;
-    if (otpLock < 1) otpLock = 1;
-    if (otpLock > 60) otpLock = 60;
     let maxFile = toInt(str(form, "max_file_size")) || 15;
     if (maxFile < 1) maxFile = 1;
     if (maxFile > 100) maxFile = 100;
@@ -998,9 +916,6 @@ export async function handleAdminApi(ctx: Ctx, name: string): Promise<Response> 
     let chatDays = toInt(str(form, "chat_cleanup_days"));
     if (chatDays < 0) chatDays = 0;
 
-    await db.setSetting(env.DB, "2fa_enabled", str(form, "2fa_enabled") ? "1" : "0");
-    await db.setSetting(env.DB, "otp_max_attempts", String(otpMax));
-    await db.setSetting(env.DB, "otp_lockout_mins", String(otpLock));
     await db.setSetting(env.DB, "max_file_size", String(maxFile));
     await db.setSetting(env.DB, "auto_cleanup", str(form, "auto_cleanup") ? "1" : "0");
     await db.setSetting(env.DB, "cleanup_days", String(cleanupDays));

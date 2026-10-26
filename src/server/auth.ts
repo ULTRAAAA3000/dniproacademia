@@ -1,12 +1,13 @@
 import type { Env, User, Session } from "./types";
 import * as db from "./db";
-import { sendOtpEmail, sendAdminAlert } from "./mail";
-import { getIp, randomHex, randomInt, sha256, sameText, nowSeconds, nowSql, fmtDateTimeSec } from "./utils";
+import { sendAdminAlert } from "./mail";
+import { getIp, randomHex, sha256, sameText, nowSql, fmtDateTimeSec } from "./utils";
 
 const USER_COOKIE = "da_session";
 const ADMIN_COOKIE = "da_admin";
 const USER_SESSION_SECONDS = 1209600;
 const ADMIN_SESSION_SECONDS = 43200;
+const MAX_FAILS = 5;
 
 export async function hashPassword(password: string): Promise<string> {
   const salt = randomHex(16);
@@ -126,109 +127,43 @@ export interface LoginResult {
   ok: boolean;
   msg?: string;
   locked?: boolean;
-  expired?: boolean;
-  remaining?: number;
-  step?: string | number;
   role?: string;
   cookie?: string;
 }
 
-async function lockMessage(env: Env, lockKey: string): Promise<LoginResult | null> {
-  const lockedUntil = await db.getTransient(env.DB, lockKey);
-  if (!lockedUntil) return null;
-  const secsLeft = parseInt(lockedUntil, 10) - nowSeconds();
-  if (secsLeft <= 0) return null;
-  const minsLeft = Math.ceil(secsLeft / 60);
-  return { ok: false, msg: "Забагато невдалих спроб. Спробуйте через " + minsLeft + " хв.", locked: true };
-}
-
-export async function loginStep1(env: Env, request: Request, emailRaw: string, password: string): Promise<LoginResult> {
+export async function login(env: Env, request: Request, emailRaw: string, password: string): Promise<LoginResult> {
   const email = emailRaw.toLowerCase().trim();
   const ip = getIp(request);
   const id = await sha256(email + ip);
-  const lockKey = "lock_" + id;
+  const failKey = "fails_" + id;
 
-  const locked = await lockMessage(env, lockKey);
-  if (locked) return locked;
+  const tries = parseInt((await db.getTransient(env.DB, failKey)) || "0", 10);
+  if (tries >= MAX_FAILS) {
+    return { ok: false, msg: "Забагато невдалих спроб. Спробуйте через 15 хв.", locked: true };
+  }
 
   const user = await db.getUserByEmail(env.DB, email);
   if (!user) {
+    await db.setTransient(env.DB, failKey, String(tries + 1), 900);
     await db.logLoginFail(env.DB, email, ip, "user_not_found");
     return { ok: false, msg: "Акаунт не знайдено." };
   }
+
   const passwordOk = await checkPassword(password, user.password);
   if (!passwordOk) {
+    await db.setTransient(env.DB, failKey, String(tries + 1), 900);
     await db.logLoginFail(env.DB, email, ip, "bad_password");
     await maybeAlertAdmin(env, request, email, ip);
     return { ok: false, msg: "Невірний пароль." };
   }
+
   if (user.role === "pending") {
     return { ok: false, msg: "Ваш акаунт ще не підтверджений адміністратором." };
   }
 
-  const twoFa = await db.getSetting(env.DB, "2fa_enabled", "1");
-  if (twoFa !== "1") {
-    const cookie = await startUserSession(env, request, user.id);
-    return { ok: true, step: "done", role: user.role, cookie: cookie };
-  }
-
-  const code = String(randomInt(100, 999)).padStart(3, "0");
-  const otpData = { code: code, uid: user.id, attempts: 0 };
-  await db.setTransient(env.DB, "otp_" + id, JSON.stringify(otpData), 600);
-
-  const sent = await sendOtpEmail(env, email, user.first_name, code);
-  if (!sent) {
-    return { ok: false, msg: "Не вдалося надіслати код. Перевірте налаштування пошти." };
-  }
-  return { ok: true, step: 2 };
-}
-
-export async function loginStep2(env: Env, request: Request, emailRaw: string, codeRaw: string): Promise<LoginResult> {
-  const email = emailRaw.toLowerCase().trim();
-  const ip = getIp(request);
-  const code = codeRaw.trim();
-  const maxAttempts = parseInt(await db.getSetting(env.DB, "otp_max_attempts", "3"), 10);
-  const lockoutMins = parseInt(await db.getSetting(env.DB, "otp_lockout_mins", "5"), 10);
-  const id = await sha256(email + ip);
-  const lockKey = "lock_" + id;
-  const otpKey = "otp_" + id;
-
-  const locked = await lockMessage(env, lockKey);
-  if (locked) return locked;
-
-  const saved = await db.getTransient(env.DB, otpKey);
-  if (!saved) {
-    return { ok: false, msg: "Код недійсний або час вийшов. Повторіть вхід.", expired: true };
-  }
-  const otpData = JSON.parse(saved) as { code: string; uid: number; attempts: number };
-
-  if (!sameText(String(otpData.code), code)) {
-    otpData.attempts = otpData.attempts + 1;
-    const remaining = maxAttempts - otpData.attempts;
-    await db.logLoginFail(env.DB, email, ip, "bad_otp");
-    await maybeAlertAdmin(env, request, email, ip);
-
-    if (remaining <= 0) {
-      await db.deleteTransient(env.DB, otpKey);
-      const until = nowSeconds() + lockoutMins * 60;
-      await db.setTransient(env.DB, lockKey, String(until), lockoutMins * 60);
-      return {
-        ok: false,
-        msg: "Вичерпано " + maxAttempts + " спроби. Вхід заблоковано на " + lockoutMins + " хв.",
-        locked: true,
-      };
-    }
-    await db.setTransient(env.DB, otpKey, JSON.stringify(otpData), 600);
-    return { ok: false, msg: "Невірний код. Залишилось спроб: " + remaining + ".", remaining: remaining };
-  }
-
-  await db.deleteTransient(env.DB, otpKey);
-  await db.deleteTransient(env.DB, lockKey);
-  const cookie = await startUserSession(env, request, otpData.uid);
-  const user = await db.getUser(env.DB, otpData.uid);
-  let role = "student";
-  if (user && user.role) role = user.role;
-  return { ok: true, role: role, cookie: cookie };
+  await db.deleteTransient(env.DB, failKey);
+  const cookie = await startUserSession(env, request, user.id);
+  return { ok: true, role: user.role, cookie: cookie };
 }
 
 export async function registerUser(

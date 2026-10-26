@@ -91,17 +91,6 @@ export interface MaterialRow {
   teacher_name?: string;
 }
 
-export interface NewsRow {
-  id: number;
-  class_id: number;
-  author_id: number;
-  author_type: string;
-  title: string;
-  body: string;
-  created_at: string;
-  author_name?: string;
-}
-
 export interface MessageRow {
   id: number;
   chat_id: number;

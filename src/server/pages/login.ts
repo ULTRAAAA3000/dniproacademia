@@ -62,19 +62,6 @@ export async function renderLogin(env: Env, ev: string): Promise<string> {
     '<div class="da-auth-divider">або</div>' +
     '<div class="da-auth-links"><button class="da-link" id="go-register">Немає акаунту? Реєстрація</button><button class="da-link" id="go-forgot">Забули пароль?</button></div></div>';
 
-  const otpForm =
-    '<div class="da-auth-card" id="da-otp-form" style="display:none">' + LOGO +
-    '<h2 class="da-auth-title">Підтвердження входу</h2>' +
-    '<p class="da-auth-subtitle" id="otp-hint">Введіть 3-значний код, надісланий на вашу пошту</p>' +
-    '<div class="da-alert" id="otp-alert" style="display:none"></div>' +
-    '<div class="da-otp-inputs">' +
-    '<input class="da-otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d1" autocomplete="off">' +
-    '<input class="da-otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d2" autocomplete="off">' +
-    '<input class="da-otp-digit" type="text" inputmode="numeric" maxlength="1" id="otp-d3" autocomplete="off">' +
-    "</div>" +
-    button("btn-verify-otp", "Підтвердити") +
-    '<div class="da-auth-links" style="margin-top:12px"><button class="da-link" id="go-back-from-otp">← Повернутися до входу</button></div></div>';
-
   const registerForm =
     '<div class="da-auth-card" id="da-register-form" style="display:none">' + LOGO +
     '<h2 class="da-auth-title">Реєстрація</h2>' +
@@ -107,7 +94,7 @@ export async function renderLogin(env: Env, ev: string): Promise<string> {
     "</head><body>" +
     '<div class="da-auth-page"></div><div class="da-particles" id="da-particles"></div>' +
     notice +
-    '<div class="da-auth-wrap" id="da-auth">' + loginForm + otpForm + registerForm + forgotForm + "</div>" +
+    '<div class="da-auth-wrap" id="da-auth">' + loginForm + registerForm + forgotForm + "</div>" +
     '<a href="/" class="da-back-btn"><svg width="13" height="13" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>На головну</a>' +
     captchaScript +
     '<script src="/assets/login.js"></script></body></html>'

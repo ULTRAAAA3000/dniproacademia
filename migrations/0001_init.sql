@@ -129,25 +129,6 @@ CREATE TABLE reg_log (
 );
 CREATE INDEX idx_reg_log ON reg_log (ip, registered_at);
 
-CREATE TABLE news (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  class_id INTEGER NOT NULL,
-  author_id INTEGER NOT NULL,
-  author_type TEXT NOT NULL DEFAULT 'teacher' CHECK (author_type IN ('teacher','admin')),
-  title TEXT NOT NULL,
-  body TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-CREATE INDEX idx_news_class ON news (class_id, created_at);
-
-CREATE TABLE news_read (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  news_id INTEGER NOT NULL,
-  student_id INTEGER NOT NULL,
-  read_at TEXT NOT NULL DEFAULT (datetime('now')),
-  UNIQUE (news_id, student_id)
-);
-
 CREATE TABLE submissions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   homework_id INTEGER NOT NULL,

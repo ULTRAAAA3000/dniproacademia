@@ -1,7 +1,6 @@
 import { byId, inputValue, setValue, api, showAlert, hide, setLoading } from "./common";
 
-const FORMS = ["da-login-form", "da-register-form", "da-forgot-form", "da-otp-form"];
-let otpEmail = "";
+const FORMS = ["da-login-form", "da-register-form", "da-forgot-form"];
 let forgotEmail = "";
 
 function showPanel(id: string): void {
@@ -31,18 +30,6 @@ click("go-register", () => showPanel("da-register-form"));
 click("go-login-from-reg", () => showPanel("da-login-form"));
 click("go-forgot", () => showPanel("da-forgot-form"));
 click("go-login-from-forgot", () => showPanel("da-login-form"));
-
-click("go-back-from-otp", () => {
-  clearOtp();
-  hide(byId("otp-alert"));
-  showPanel("da-login-form");
-});
-
-function clearOtp(): void {
-  setValue("otp-d1", "");
-  setValue("otp-d2", "");
-  setValue("otp-d3", "");
-}
 
 const eyes = document.querySelectorAll<HTMLElement>(".da-field-eye");
 for (let i = 0; i < eyes.length; i++) {
@@ -80,18 +67,8 @@ async function doLogin(): Promise<void> {
   const r = await api("login", { email: email, password: password });
   setLoading(button, false);
 
-  if (r.ok && r.step === "done") {
+  if (r.ok) {
     window.location.href = "/da-cabinet";
-  } else if (r.ok && r.step === 2) {
-    otpEmail = email;
-    const hint = byId("otp-hint");
-    if (hint) hint.textContent = "Код надіслано на " + email;
-    clearOtp();
-    showPanel("da-otp-form");
-    setTimeout(() => {
-      const first = byId("otp-d1");
-      if (first) first.focus();
-    }, 250);
   } else {
     showAlert(alertBox, r.msg || "Помилка входу");
     if (r.locked && button) (button as HTMLButtonElement).disabled = true;
@@ -109,52 +86,6 @@ for (let i = 0; i < loginInputs.length; i++) {
     });
   }
 }
-
-const digits = document.querySelectorAll<HTMLInputElement>(".da-otp-digit");
-for (let i = 0; i < digits.length; i++) {
-  digits[i].addEventListener("input", () => {
-    const clean = digits[i].value.replace(/\D/g, "");
-    digits[i].value = clean.slice(-1);
-    if (clean && digits[i + 1]) digits[i + 1].focus();
-    if (inputValue("otp-d1") && inputValue("otp-d2") && inputValue("otp-d3")) {
-      doVerify();
-    }
-  });
-  digits[i].addEventListener("keydown", (e) => {
-    if (e.key === "Backspace" && !digits[i].value && digits[i - 1]) {
-      digits[i - 1].focus();
-    }
-  });
-}
-
-async function doVerify(): Promise<void> {
-  const code = inputValue("otp-d1") + inputValue("otp-d2") + inputValue("otp-d3");
-  const alertBox = byId("otp-alert");
-  const button = byId("btn-verify-otp");
-
-  if (code.length < 3) {
-    showAlert(alertBox, "Введіть 3-значний код");
-    return;
-  }
-
-  setLoading(button, true);
-  const r = await api("verify_otp", { email: otpEmail, code: code });
-  setLoading(button, false);
-
-  if (r.ok) {
-    window.location.href = "/da-cabinet";
-  } else {
-    showAlert(alertBox, r.msg || "Невірний код");
-    clearOtp();
-    const first = byId("otp-d1");
-    if (first) first.focus();
-    if (r.locked || r.expired) {
-      setTimeout(() => showPanel("da-login-form"), 2500);
-    }
-  }
-}
-
-click("btn-verify-otp", doVerify);
 
 click("btn-register", async () => {
   const first = inputValue("reg-first").trim();

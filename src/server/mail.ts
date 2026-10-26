@@ -56,18 +56,6 @@ function wrapLetter(content: string): string {
   );
 }
 
-export async function sendOtpEmail(env: Env, to: string, name: string, code: string): Promise<boolean> {
-  const subject = SITE_NAME + " — ваш код підтвердження: " + code;
-  const content =
-    '<p style="margin:0 0 12px;font-size:16px;color:#1a2e2a;">Вітаємо, <strong>' + esc(name) + "</strong>!</p>" +
-    '<p style="margin:0 0 28px;font-size:14px;color:#4a6b65;line-height:1.6;">Ви намагаєтеся увійти до особистого кабінету. Введіть цей код для підтвердження:</p>' +
-    '<div style="text-align:center;margin:0 0 28px;"><div style="display:inline-block;background:#f0faf7;border:2px solid #1a6b5a;border-radius:12px;padding:20px 48px;">' +
-    '<span style="font-size:42px;font-weight:900;letter-spacing:12px;color:#1a6b5a;font-family:\'Courier New\',monospace;">' + esc(code) + "</span></div></div>" +
-    '<p style="margin:0 0 8px;font-size:13px;color:#8a9e9a;text-align:center;">Код дійсний протягом <strong>10 хвилин</strong></p>' +
-    '<p style="margin:0;font-size:13px;color:#8a9e9a;text-align:center;">Якщо ви не намагалися увійти — проігноруйте цей лист.</p>';
-  return await sendMail(env, to, subject, wrapLetter(content), "Ваш код підтвердження: " + code);
-}
-
 export async function sendVerificationEmail(env: Env, to: string, name: string, verifyUrl: string): Promise<boolean> {
   const subject = SITE_NAME + " — підтвердьте вашу електронну пошту";
   const content =

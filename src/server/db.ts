@@ -1,6 +1,6 @@
 import type {
   User, ClassRow, SubjectRow, ScheduleRow, HomeworkRow, GradeRow, FinalGradeRow,
-  MaterialRow, NewsRow, MessageRow, ChatListRow, StudentGrades, AuditActor,
+  MaterialRow, MessageRow, ChatListRow, StudentGrades, AuditActor,
 } from "./types";
 import { nowSql, nowSeconds, sqlMinutesAgo } from "./utils";
 
@@ -224,41 +224,6 @@ export async function getTeacherMaterials(db: D1Database, classId: number, teach
     .bind(classId, teacherId)
     .all<MaterialRow>();
   return r.results;
-}
-
-export async function getNews(db: D1Database, classId: number): Promise<NewsRow[]> {
-  const r = await db
-    .prepare(
-      "SELECT n.*, CASE n.author_type WHEN 'admin' THEN 'Адміністрація' ELSE u.last_name || ' ' || u.first_name END AS author_name FROM news n LEFT JOIN users u ON u.id = n.author_id WHERE n.class_id = ? ORDER BY n.created_at DESC, n.id DESC"
-    )
-    .bind(classId)
-    .all<NewsRow>();
-  return r.results;
-}
-
-export async function countUnreadNews(db: D1Database, classId: number, studentId: number): Promise<number> {
-  const total = await db
-    .prepare("SELECT COUNT(*) AS c FROM news WHERE class_id = ?")
-    .bind(classId)
-    .first<{ c: number }>();
-  const read = await db
-    .prepare(
-      "SELECT COUNT(*) AS c FROM news_read nr JOIN news n ON n.id = nr.news_id WHERE n.class_id = ? AND nr.student_id = ?"
-    )
-    .bind(classId, studentId)
-    .first<{ c: number }>();
-  let diff = (total ? total.c : 0) - (read ? read.c : 0);
-  if (diff < 0) diff = 0;
-  return diff;
-}
-
-export async function markNewsRead(db: D1Database, classId: number, studentId: number): Promise<void> {
-  await db
-    .prepare(
-      "INSERT OR IGNORE INTO news_read (news_id, student_id, read_at) SELECT id, ?, ? FROM news WHERE class_id = ?"
-    )
-    .bind(studentId, nowSql(), classId)
-    .run();
 }
 
 export async function getOrCreateChat(db: D1Database, a: number, b: number): Promise<number> {

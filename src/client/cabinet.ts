@@ -1,6 +1,6 @@
 import {
   byId, inputValue, setValue, escapeHtml, gradeColor, api, postForm, showAlert, hide, setLoading,
-  openModal, closeModal, removeSmoothly, formatDateTime,
+  openModal, closeModal, removeSmoothly,
 } from "./common";
 import { startSettings, openSettings, closeSettings } from "./settings";
 import { startChat, openChatPage } from "./chat";
@@ -52,7 +52,7 @@ function swapSkeleton(container: HTMLElement | null, makeSkeleton: () => string,
   setTimeout(() => {
     container.style.opacity = "0";
     container.innerHTML = real;
-    const items = container.querySelectorAll<HTMLElement>(".da-card,.da-material-card,.da-sgrade-block,.da-gc,.da-news-card");
+    const items = container.querySelectorAll<HTMLElement>(".da-card,.da-material-card,.da-sgrade-block,.da-gc");
     for (let i = 0; i < items.length; i++) {
       items[i].style.opacity = "0";
       setTimeout(() => {
@@ -106,50 +106,6 @@ function gradeChipHtml(id: number, grade: number, description: string, uid: stri
     '<div class="da-gc-btn da-gc-btn-edit" style="' + BUTTON_STYLE + 'background-color:#f2faf9;border:1.5px solid #deecea;color:#1a6b5e;" data-act="edit-grade" data-id="' + id + '" data-grade="' + grade + '" data-desc="' + escapeHtml(description) + '">' + ICON_EDIT + "</div>" +
     '<div class="da-gc-btn da-gc-btn-del" style="' + BUTTON_STYLE + 'background-color:#fff7f7;border:1.5px solid #fecaca;color:#c0392b;" data-act="delete-grade" data-id="' + id + '" data-uid="' + uid + '">' + ICON_TRASH + "</div></div></div>"
   );
-}
-
-async function addNews(button: HTMLElement): Promise<void> {
-  const titleEl = byId("news-title-inp") as HTMLInputElement | null;
-  const bodyEl = byId("news-body-inp") as HTMLTextAreaElement | null;
-  const alertBox = byId("news-alert");
-  if (!titleEl || !bodyEl) return;
-
-  const title = titleEl.value.trim();
-  const body = bodyEl.value.trim();
-  if (!title || !body) {
-    showAlert(alertBox, "Заповніть тему та текст");
-    return;
-  }
-  hide(alertBox);
-
-  setLoading(button, true);
-  const r = await api("add_news", { class_id: button.dataset.cid || "0", title: title, body: body });
-  setLoading(button, false);
-
-  if (!r.ok) {
-    showAlert(alertBox, r.msg || "Помилка");
-    return;
-  }
-
-  const authorEl = document.querySelector(".da-user-name");
-  let author = "";
-  if (authorEl) author = authorEl.textContent || "";
-
-  const html =
-    '<div class="da-news-card" id="news-' + r.id + '"><div class="da-news-card-header"><div class="da-news-card-title">' + escapeHtml(title) +
-    '</div><div class="da-news-card-meta"><span class="da-news-author">' + escapeHtml(author) + '</span><span class="da-news-date">' + formatDateTime(new Date()) + "</span>" +
-    '<div class="da-gc-btn da-gc-btn-del" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;cursor:pointer;background-color:#fff7f7;border:1.5px solid #fecaca;color:#c0392b;" data-act="delete-news" data-id="' +
-    r.id + '" title="Видалити">' + ICON_TRASH.replace(/15/g, "13") + "</div></div></div>" +
-    '<div class="da-news-card-body">' + escapeHtml(body).replace(/\n/g, "<br>") + "</div></div>";
-
-  const list = byId("da-news-list");
-  if (list) {
-    const empty = list.querySelector(".da-empty");
-    if (empty) empty.remove();
-    list.insertAdjacentHTML("afterbegin", html);
-  }
-  titleEl.value = "";
-  bodyEl.value = "";
 }
 
 async function refreshGrades(button: HTMLElement): Promise<void> {
@@ -371,13 +327,6 @@ function handleActions(target: HTMLElement): boolean {
     openSettings();
   } else if (act === "close-settings") {
     closeSettings();
-  } else if (act === "add-news") {
-    addNews(actionEl);
-  } else if (act === "delete-news") {
-    if (!confirm("Видалити новину?")) return true;
-    api("delete_news", { news_id: id }).then((r) => {
-      if (r.ok) removeSmoothly(byId("news-" + id));
-    });
   } else if (act === "edit-hw") {
     setValue("ehw-id", id);
     setValue("ehw-topic", actionEl.dataset.topic || "");
@@ -548,6 +497,5 @@ startClicks();
 startChat();
 
 swapSkeleton(document.querySelector<HTMLElement>(".da-hw-list"), skeletonCard, 3, 400);
-swapSkeleton(document.querySelector<HTMLElement>(".da-news-list"), skeletonCard, 3, 450);
 swapSkeleton(document.querySelector<HTMLElement>(".da-materials-list"), skeletonMaterial, 3, 480);
 swapSkeleton(document.querySelector<HTMLElement>(".da-grades-list"), skeletonGrade, 4, 420);
