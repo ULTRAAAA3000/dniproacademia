@@ -45,8 +45,11 @@ Windows 10/11, Linux або macOS. Для запуску на своєму ко�
 
 ```
 npm install
+npm run db:init
 npm run dev
 ```
+
+Перед першим запуском скопіюйте `.dev.vars.example` у `.dev.vars` і вкажіть пароль адміністратора.
 
 Після цього сайт буде на `http://localhost:8788`. Точка входу сервера — `functions/[[path]].ts`, головна сторінка — `public/index.html`.
 
