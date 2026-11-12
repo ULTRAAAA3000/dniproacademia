@@ -84,9 +84,11 @@ function filterChips(url: URL, subjects: string[], current: string, withAll: boo
   return html + "</div>";
 }
 
-// Кнопки в шапці кабінету учня (true — показати). Вчителя це не стосується.
-const SHOW_STUDENT_CHAT_BTN = false;
-const SHOW_STUDENT_SETTINGS_BTN = false;
+// Кнопки в шапці кабінету (true — показати), для учня і для вчителя
+const SHOW_CHAT_BTN = false;
+const SHOW_SETTINGS_BTN = false;
+// Кнопки вивантаження оцінок у Excel у кабінеті вчителя (true — показати)
+const SHOW_EXPORT_BTNS = false;
 
 export async function renderHeader(env: Env, user: User, teacher: boolean): Promise<string> {
   const initials = (user.first_name.slice(0, 1) + user.last_name.slice(0, 1)).toUpperCase();
@@ -110,7 +112,7 @@ export async function renderHeader(env: Env, user: User, teacher: boolean): Prom
     '<div class="da-color-swatch" data-scheme="rose" style="background:#be185d" title="Рожевий"></div>';
 
   let chatBtn = "";
-  if (teacher || SHOW_STUDENT_CHAT_BTN) {
+  if (SHOW_CHAT_BTN) {
     chatBtn =
       '<div id="da-chat-btn" data-act="open-chat" role="button" tabindex="0" style="position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #deecea;border-radius:8px;cursor:pointer;color:#6b8f89;flex-shrink:0;user-select:none;">' +
       '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
@@ -118,7 +120,7 @@ export async function renderHeader(env: Env, user: User, teacher: boolean): Prom
   }
 
   let settingsBtn = "";
-  if (teacher || SHOW_STUDENT_SETTINGS_BTN) {
+  if (SHOW_SETTINGS_BTN) {
     settingsBtn =
       '<div id="da-settings-btn" data-act="open-settings" role="button" tabindex="0" title="Налаштування">' +
       '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>';
@@ -577,10 +579,15 @@ async function teacherSummary(env: Env, url: URL, user: User, classId: number, c
   }
 
   let exportSubject = "";
-  if (info.current) {
+  if (SHOW_EXPORT_BTNS && info.current) {
     exportSubject =
       '<a href="/api/export_grades?cid=' + classId + "&subject=" + encodeURIComponent(info.current) + '" class="da-btn--export" title="Завантажити оцінки з предмету ' + esc(info.current) + '">' +
       EXPORT_ICON + esc(info.current) + " .xlsx</a>";
+  }
+
+  let exportAll = "";
+  if (SHOW_EXPORT_BTNS) {
+    exportAll = '<a href="/api/export_grades?cid=' + classId + '" class="da-btn--export" title="Завантажити всі оцінки класу">' + EXPORT_ICON + "Весь клас .xlsx</a>";
   }
 
   let html =
@@ -588,7 +595,7 @@ async function teacherSummary(env: Env, url: URL, user: User, classId: number, c
     ".da-btn--export{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;background:#1a7a4a;color:#fff!important;text-decoration:none!important;border:none;cursor:pointer;transition:background .15s}" +
     ".da-btn--export:hover{background:#155e38}.da-btn--export svg{width:15px;height:15px;fill:#fff;flex-shrink:0}</style>" +
     '<div class="da-panel"><div class="da-export-bar"><h2 class="da-panel-title">Підсумкові оцінки — ' + esc(cls.name) + "</h2>" + exportSubject +
-    '<a href="/api/export_grades?cid=' + classId + '" class="da-btn--export" title="Завантажити всі оцінки класу">' + EXPORT_ICON + "Весь клас .xlsx</a></div>" +
+    exportAll + "</div>" +
     subjectPicker(url, info.subjects, user.subject || "", info.current) +
     '<div class="da-summary-table-wrap"><table class="da-summary-table"><thead><tr><th>Учень</th><th>Середній бал</th><th>Виведена оцінка</th><th></th></tr></thead><tbody>';
 
