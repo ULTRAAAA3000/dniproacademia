@@ -84,6 +84,10 @@ function filterChips(url: URL, subjects: string[], current: string, withAll: boo
   return html + "</div>";
 }
 
+// Кнопки в шапці кабінету учня (true — показати). Вчителя це не стосується.
+const SHOW_STUDENT_CHAT_BTN = false;
+const SHOW_STUDENT_SETTINGS_BTN = false;
+
 export async function renderHeader(env: Env, user: User, teacher: boolean): Promise<string> {
   const initials = (user.first_name.slice(0, 1) + user.last_name.slice(0, 1)).toUpperCase();
   let roleName = "Учень";
@@ -105,15 +109,27 @@ export async function renderHeader(env: Env, user: User, teacher: boolean): Prom
     '<div class="da-color-swatch" data-scheme="orange" style="background:#c2410c" title="Помаранчевий"></div>' +
     '<div class="da-color-swatch" data-scheme="rose" style="background:#be185d" title="Рожевий"></div>';
 
+  let chatBtn = "";
+  if (teacher || SHOW_STUDENT_CHAT_BTN) {
+    chatBtn =
+      '<div id="da-chat-btn" data-act="open-chat" role="button" tabindex="0" style="position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #deecea;border-radius:8px;cursor:pointer;color:#6b8f89;flex-shrink:0;user-select:none;">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+      badge + "</div>";
+  }
+
+  let settingsBtn = "";
+  if (teacher || SHOW_STUDENT_SETTINGS_BTN) {
+    settingsBtn =
+      '<div id="da-settings-btn" data-act="open-settings" role="button" tabindex="0" title="Налаштування">' +
+      '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>';
+  }
+
   return (
     '<header class="da-header"><div class="da-header-left">' +
     '<button class="da-menu-toggle" id="da-menu-toggle" aria-label="Меню"><span></span><span></span><span></span></button>' +
     '<span class="da-header-logo">Дніпро Академія</span></div><div class="da-header-right">' +
-    '<div id="da-chat-btn" data-act="open-chat" role="button" tabindex="0" style="position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #deecea;border-radius:8px;cursor:pointer;color:#6b8f89;flex-shrink:0;user-select:none;">' +
-    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
-    badge + "</div>" +
-    '<div id="da-settings-btn" data-act="open-settings" role="button" tabindex="0" title="Налаштування">' +
-    '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>' +
+    chatBtn +
+    settingsBtn +
     '<div class="da-user-badge"><div class="da-user-avatar">' + esc(initials) + '</div><div class="da-user-info"><span class="da-user-name">' + fullName +
     '</span><span class="da-user-role">' + roleName + "</span></div></div>" +
     '<button class="da-logout-btn" id="da-logout"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="da-logout-label">Вийти</span></button>' +
