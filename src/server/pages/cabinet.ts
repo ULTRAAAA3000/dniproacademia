@@ -10,7 +10,6 @@ function icon(paths: string, size = 16): string {
 }
 
 const NAV_ICONS: Record<string, string> = {
-  news: icon('<path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/>'),
   schedule: icon('<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>'),
   homework: icon('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/>'),
   grades: icon('<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'),
@@ -85,6 +84,12 @@ function filterChips(url: URL, subjects: string[], current: string, withAll: boo
   return html + "</div>";
 }
 
+// Кнопки в шапці кабінету (true — показати), для учня і для вчителя
+const SHOW_CHAT_BTN = false;
+const SHOW_SETTINGS_BTN = false;
+// Кнопки вивантаження оцінок у Excel у кабінеті вчителя (true — показати)
+const SHOW_EXPORT_BTNS = false;
+
 export async function renderHeader(env: Env, user: User, teacher: boolean): Promise<string> {
   const initials = (user.first_name.slice(0, 1) + user.last_name.slice(0, 1)).toUpperCase();
   let roleName = "Учень";
@@ -106,15 +111,27 @@ export async function renderHeader(env: Env, user: User, teacher: boolean): Prom
     '<div class="da-color-swatch" data-scheme="orange" style="background:#c2410c" title="Помаранчевий"></div>' +
     '<div class="da-color-swatch" data-scheme="rose" style="background:#be185d" title="Рожевий"></div>';
 
+  let chatBtn = "";
+  if (SHOW_CHAT_BTN) {
+    chatBtn =
+      '<div id="da-chat-btn" data-act="open-chat" role="button" tabindex="0" style="position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #deecea;border-radius:8px;cursor:pointer;color:#6b8f89;flex-shrink:0;user-select:none;">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
+      badge + "</div>";
+  }
+
+  let settingsBtn = "";
+  if (SHOW_SETTINGS_BTN) {
+    settingsBtn =
+      '<div id="da-settings-btn" data-act="open-settings" role="button" tabindex="0" title="Налаштування">' +
+      '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>';
+  }
+
   return (
     '<header class="da-header"><div class="da-header-left">' +
     '<button class="da-menu-toggle" id="da-menu-toggle" aria-label="Меню"><span></span><span></span><span></span></button>' +
     '<span class="da-header-logo">Дніпро Академія</span></div><div class="da-header-right">' +
-    '<div id="da-chat-btn" data-act="open-chat" role="button" tabindex="0" style="position:relative;width:38px;height:38px;display:flex;align-items:center;justify-content:center;background:#fff;border:1.5px solid #deecea;border-radius:8px;cursor:pointer;color:#6b8f89;flex-shrink:0;user-select:none;">' +
-    '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
-    badge + "</div>" +
-    '<div id="da-settings-btn" data-act="open-settings" role="button" tabindex="0" title="Налаштування">' +
-    '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>' +
+    chatBtn +
+    settingsBtn +
     '<div class="da-user-badge"><div class="da-user-avatar">' + esc(initials) + '</div><div class="da-user-info"><span class="da-user-name">' + fullName +
     '</span><span class="da-user-role">' + roleName + "</span></div></div>" +
     '<button class="da-logout-btn" id="da-logout"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg><span class="da-logout-label">Вийти</span></button>' +
@@ -200,34 +217,6 @@ function scheduleView(schedule: ScheduleRow[], overall: number): string {
     html += "</tr>";
   }
   return html + "</tbody></table></div></div>";
-}
-
-function newsCards(news: Awaited<ReturnType<typeof db.getNews>>, user: User | null): string {
-  let html = "";
-  for (let i = 0; i < news.length; i++) {
-    const n = news[i];
-    let deleteBtn = "";
-    if (user && n.author_id === user.id && n.author_type === "teacher") {
-      deleteBtn =
-        '<div class="da-gc-btn da-gc-btn-del" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;cursor:pointer;background-color:#fff7f7;border:1.5px solid #fecaca;color:#c0392b;flex-shrink:0;" data-act="delete-news" data-id="' +
-        n.id + '" title="Видалити">' + ICON_TRASH.replace(/15/g, "13") + "</div>";
-    }
-    html +=
-      '<div class="da-news-card" id="news-' + n.id + '"><div class="da-news-card-header"><div class="da-news-card-title">' + esc(n.title) +
-      '</div><div class="da-news-card-meta"><span class="da-news-author">' + esc(n.author_name) + '</span><span class="da-news-date">' +
-      fmtDateTime(n.created_at) + "</span>" + deleteBtn + '</div></div><div class="da-news-card-body">' + nl2br(n.body) + "</div></div>";
-  }
-  return html;
-}
-
-async function studentNews(env: Env, user: User, classId: number): Promise<string> {
-  const news = await db.getNews(env.DB, classId);
-  await db.markNewsRead(env.DB, classId, user.id);
-  let html = '<div class="da-panel"><h2 class="da-panel-title">Новини класу</h2>';
-  if (news.length === 0) {
-    return html + '<div class="da-empty">Новин поки немає.</div></div>';
-  }
-  return html + '<div class="da-news-list">' + newsCards(news, null) + "</div></div>";
 }
 
 function homeworkCard(h: HomeworkRow, today: string, showTeacher: boolean, actions: string): string {
@@ -364,33 +353,31 @@ async function studentMaterials(env: Env, url: URL, classId: number): Promise<st
   return html + "</div></div>";
 }
 
-function studentNav(url: URL, current: string, classId: number, unread: number): string {
+function studentNav(url: URL, current: string, classId: number): string {
   const items: [string, string][] = [
-    ["news", "Новини"], ["schedule", "Розклад"], ["homework", "Завдання"],
+    ["schedule", "Розклад"], ["homework", "Завдання"],
     ["grades", "Оцінки"], ["summary", "Середній бал"], ["materials", "Матеріали"],
   ];
-  return navLinks(url, current, classId, items, unread);
+  return navLinks(url, current, classId, items);
 }
 
 function teacherNav(url: URL, current: string, classId: number): string {
   const items: [string, string][] = [
-    ["news", "Новини"], ["schedule", "Розклад"], ["homework", "Завдання"],
+    ["schedule", "Розклад"], ["homework", "Завдання"],
     ["grades", "Оцінки"], ["summary", "Підсумкові"], ["materials", "Матеріали"],
   ];
-  return navLinks(url, current, classId, items, 0);
+  return navLinks(url, current, classId, items);
 }
 
-function navLinks(url: URL, current: string, classId: number, items: [string, string][], unread: number): string {
+function navLinks(url: URL, current: string, classId: number, items: [string, string][]): string {
   let html = "";
   for (let i = 0; i < items.length; i++) {
     const key = items[i][0];
     let active = "";
     if (current === key) active = "active";
-    let badge = "";
-    if (key === "news" && unread > 0) badge = "<span class='da-news-badge'>" + unread + "</span>";
     html +=
       "<a href='" + esc(link(url, { da_class: classId, da_tab: key, da_subj: "" })) + "' class='da-nav-item " + active + "' data-tab='" + key + "'><span class='da-nav-icon'>" +
-      NAV_ICONS[key] + "</span>" + items[i][1] + badge + "</a>";
+      NAV_ICONS[key] + "</span>" + items[i][1] + "</a>";
   }
   return html;
 }
@@ -415,10 +402,8 @@ export async function renderStudent(env: Env, url: URL, user: User): Promise<str
   if (!tab) tab = "schedule";
 
   let overall = 0;
-  let unread = 0;
   if (classId) {
     overall = await db.getOverallAvg(env.DB, user.id, classId);
-    unread = await db.countUnreadNews(env.DB, classId, user.id);
   }
 
   let classLinks = "";
@@ -435,8 +420,6 @@ export async function renderStudent(env: Env, url: URL, user: User): Promise<str
   let main = "";
   if (!classId) {
     main = emptyState(icon('<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>', 26), "Вас ще не додано до класу. Зверніться до адміністратора.");
-  } else if (tab === "news") {
-    main = await studentNews(env, user, classId);
   } else if (tab === "homework") {
     main = await studentHomework(env, url, classId);
   } else if (tab === "grades") {
@@ -449,29 +432,12 @@ export async function renderStudent(env: Env, url: URL, user: User): Promise<str
     main = scheduleView(await db.getSchedule(env.DB, classId), overall);
   }
 
-  if (tab === "news" && classId) unread = 0;
-
   return (
     '<div class="da-cabinet">' + (await renderHeader(env, user, false)) +
     '<div class="da-body"><aside class="da-sidebar" id="da-sidebar">' + classLinks +
-    '<div class="da-sb-section"><div class="da-sb-label">Меню</div>' + studentNav(url, tab, classId, unread) + "</div></aside>" +
+    '<div class="da-sb-section"><div class="da-sb-label">Меню</div>' + studentNav(url, tab, classId) + "</div></aside>" +
     '<main class="da-main">' + main + "</main></div></div>"
   );
-}
-
-function teacherNews(news: Awaited<ReturnType<typeof db.getNews>>, user: User, classId: number, cls: ClassRow): string {
-  let html =
-    '<div class="da-panel"><h2 class="da-panel-title">Новини — ' + esc(cls.name) + "</h2>" +
-    '<div class="da-add-form"><h3 class="da-form-title">Додати новину</h3>' +
-    '<div class="da-form-group"><label class="da-label">Тема</label><input type="text" class="da-input" id="news-title-inp" placeholder="Тема новини"></div>' +
-    '<div class="da-form-group"><label class="da-label">Текст</label><textarea class="da-input da-textarea" id="news-body-inp" rows="4" placeholder="Текст повідомлення..."></textarea></div>' +
-    '<div class="da-alert" id="news-alert" style="display:none"></div>' +
-    '<button class="da-btn-primary" style="background:#1a6b5e !important;background-image:none !important;border:none !important;" data-act="add-news" data-cid="' + classId +
-    '"><span class="da-btn-text">Опублікувати</span><span class="da-spinner" style="display:none"></span></button></div>' +
-    '<h3 class="da-section-sub">Опубліковані новини</h3><div class="da-news-list" id="da-news-list">';
-  if (news.length === 0) html += '<div class="da-empty">Новин ще немає.</div>';
-  html += newsCards(news, user);
-  return html + "</div></div>";
 }
 
 async function teacherHomework(env: Env, user: User, classId: number, cls: ClassRow): Promise<string> {
@@ -613,10 +579,15 @@ async function teacherSummary(env: Env, url: URL, user: User, classId: number, c
   }
 
   let exportSubject = "";
-  if (info.current) {
+  if (SHOW_EXPORT_BTNS && info.current) {
     exportSubject =
       '<a href="/api/export_grades?cid=' + classId + "&subject=" + encodeURIComponent(info.current) + '" class="da-btn--export" title="Завантажити оцінки з предмету ' + esc(info.current) + '">' +
       EXPORT_ICON + esc(info.current) + " .xlsx</a>";
+  }
+
+  let exportAll = "";
+  if (SHOW_EXPORT_BTNS) {
+    exportAll = '<a href="/api/export_grades?cid=' + classId + '" class="da-btn--export" title="Завантажити всі оцінки класу">' + EXPORT_ICON + "Весь клас .xlsx</a>";
   }
 
   let html =
@@ -624,7 +595,7 @@ async function teacherSummary(env: Env, url: URL, user: User, classId: number, c
     ".da-btn--export{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;background:#1a7a4a;color:#fff!important;text-decoration:none!important;border:none;cursor:pointer;transition:background .15s}" +
     ".da-btn--export:hover{background:#155e38}.da-btn--export svg{width:15px;height:15px;fill:#fff;flex-shrink:0}</style>" +
     '<div class="da-panel"><div class="da-export-bar"><h2 class="da-panel-title">Підсумкові оцінки — ' + esc(cls.name) + "</h2>" + exportSubject +
-    '<a href="/api/export_grades?cid=' + classId + '" class="da-btn--export" title="Завантажити всі оцінки класу">' + EXPORT_ICON + "Весь клас .xlsx</a></div>" +
+    exportAll + "</div>" +
     subjectPicker(url, info.subjects, user.subject || "", info.current) +
     '<div class="da-summary-table-wrap"><table class="da-summary-table"><thead><tr><th>Учень</th><th>Середній бал</th><th>Виведена оцінка</th><th></th></tr></thead><tbody>';
 
@@ -708,8 +679,6 @@ export async function renderTeacher(env: Env, url: URL, user: User): Promise<str
   let main = "";
   if (!cls) {
     main = emptyState(icon('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>', 26), "Виберіть клас у меню зліва.");
-  } else if (tab === "news") {
-    main = teacherNews(await db.getNews(env.DB, classId), user, classId, cls);
   } else if (tab === "homework") {
     main = await teacherHomework(env, user, classId, cls);
   } else if (tab === "grades") {

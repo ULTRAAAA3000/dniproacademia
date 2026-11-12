@@ -19,19 +19,19 @@ const SCHEMES: Record<string, Scheme> = {
 };
 
 interface Words {
-  hw: string; grades: string; news: string; schedule: string; summary: string; materials: string; logout: string;
+  hw: string; grades: string; schedule: string; summary: string; materials: string; logout: string;
   settings: string; appearance: string; darkTheme: string; darkThemeSub: string; colorScheme: string; fontSize: string;
   interface: string; compact: string; compactSub: string; animations: string; animSub: string; hwView: string; hwViewSub: string;
   deadlinesLabel: string; deadlines: string; deadlinesSub: string; deadlineOff: string; deadline1: string; deadline3: string; deadline7: string;
   formatLang: string; timeFmt: string; langLabel: string; resetBtn: string; resetConfirm: string;
-  panelNews: string; panelSchedule: string; panelHomework: string; panelGrades: string; panelSummary: string; panelMaterials: string;
+  panelSchedule: string; panelHomework: string; panelGrades: string; panelSummary: string; panelMaterials: string;
   avgTitle: string; avgSub: string; thSubject: string; thAvg: string; thFinal: string; thStudent: string; thActions: string;
   scheduleEmpty: string; materialsEmpty: string; hwEmpty: string; gradesEmpty: string; chatTitle: string;
 }
 
 const WORDS: Record<string, Words> = {
   uk: {
-    hw: "Завдання", grades: "Оцінки", news: "Новини", schedule: "Розклад", summary: "Середній бал", materials: "Матеріали", logout: "Вийти",
+    hw: "Завдання", grades: "Оцінки", schedule: "Розклад", summary: "Середній бал", materials: "Матеріали", logout: "Вийти",
     settings: "Налаштування", appearance: "Оформлення", darkTheme: "Темна тема", darkThemeSub: "Зменшує навантаження на очі",
     colorScheme: "Колірна схема", fontSize: "Розмір шрифту", interface: "Інтерфейс", compact: "Компактний режим", compactSub: "Менші відступи в картках",
     animations: "Анімації карток", animSub: "Плавна поява елементів", hwView: "Вигляд завдань", hwViewSub: "Список або сітка карток",
@@ -39,7 +39,7 @@ const WORDS: Record<string, Words> = {
     deadlineOff: "Вимк", deadline1: "1 день", deadline3: "3 дні", deadline7: "7 днів",
     formatLang: "Формат та мова", timeFmt: "Формат часу", langLabel: "Мова інтерфейсу",
     resetBtn: "↺ Скинути всі налаштування", resetConfirm: "Скинути всі налаштування до стандартних?",
-    panelNews: "Новини класу", panelSchedule: "Розклад", panelHomework: "Завдання", panelGrades: "Оцінки",
+    panelSchedule: "Розклад", panelHomework: "Завдання", panelGrades: "Оцінки",
     panelSummary: "Середній бал і підсумкові оцінки", panelMaterials: "Матеріали",
     avgTitle: "Середній бал", avgSub: "за поточний семестр",
     thSubject: "Предмет", thAvg: "Середній бал", thFinal: "Виведена оцінка", thStudent: "Учень", thActions: "",
@@ -47,7 +47,7 @@ const WORDS: Record<string, Words> = {
     chatTitle: "Повідомлення",
   },
   ru: {
-    hw: "Задания", grades: "Оценки", news: "Новости", schedule: "Расписание", summary: "Средний балл", materials: "Материалы", logout: "Выйти",
+    hw: "Задания", grades: "Оценки", schedule: "Расписание", summary: "Средний балл", materials: "Материалы", logout: "Выйти",
     settings: "Настройки", appearance: "Оформление", darkTheme: "Тёмная тема", darkThemeSub: "Снижает нагрузку на глаза",
     colorScheme: "Цветовая схема", fontSize: "Размер шрифта", interface: "Интерфейс", compact: "Компактный режим", compactSub: "Меньшие отступы в карточках",
     animations: "Анимации карточек", animSub: "Плавное появление элементов", hwView: "Вид заданий", hwViewSub: "Список или сетка карточек",
@@ -55,7 +55,7 @@ const WORDS: Record<string, Words> = {
     deadlineOff: "Выкл", deadline1: "1 день", deadline3: "3 дня", deadline7: "7 дней",
     formatLang: "Формат и язык", timeFmt: "Формат времени", langLabel: "Язык интерфейса",
     resetBtn: "↺ Сбросить все настройки", resetConfirm: "Сбросить все настройки до стандартных?",
-    panelNews: "Новости класса", panelSchedule: "Расписание", panelHomework: "Задания", panelGrades: "Оценки",
+    panelSchedule: "Расписание", panelHomework: "Задания", panelGrades: "Оценки",
     panelSummary: "Средний балл и итоговые оценки", panelMaterials: "Материалы",
     avgTitle: "Средний балл", avgSub: "за текущий семестр",
     thSubject: "Предмет", thAvg: "Средний балл", thFinal: "Итоговая оценка", thStudent: "Ученик", thActions: "",
@@ -63,7 +63,7 @@ const WORDS: Record<string, Words> = {
     chatTitle: "Сообщения",
   },
   en: {
-    hw: "Homework", grades: "Grades", news: "News", schedule: "Schedule", summary: "GPA", materials: "Materials", logout: "Logout",
+    hw: "Homework", grades: "Grades", schedule: "Schedule", summary: "GPA", materials: "Materials", logout: "Logout",
     settings: "Settings", appearance: "Appearance", darkTheme: "Dark Mode", darkThemeSub: "Easier on the eyes",
     colorScheme: "Color Scheme", fontSize: "Font Size", interface: "Interface", compact: "Compact Mode", compactSub: "Smaller card padding",
     animations: "Card Animations", animSub: "Smooth element transitions", hwView: "Homework View", hwViewSub: "List or card grid",
@@ -71,7 +71,7 @@ const WORDS: Record<string, Words> = {
     deadlineOff: "Off", deadline1: "1 day", deadline3: "3 days", deadline7: "7 days",
     formatLang: "Format & Language", timeFmt: "Time Format", langLabel: "Interface Language",
     resetBtn: "↺ Reset All Settings", resetConfirm: "Reset all settings to default?",
-    panelNews: "Class News", panelSchedule: "Schedule", panelHomework: "Homework", panelGrades: "Grades",
+    panelSchedule: "Schedule", panelHomework: "Homework", panelGrades: "Grades",
     panelSummary: "GPA & Final Grades", panelMaterials: "Materials",
     avgTitle: "GPA", avgSub: "current semester",
     thSubject: "Subject", thAvg: "GPA", thFinal: "Final Grade", thStudent: "Student", thActions: "",
@@ -184,7 +184,7 @@ function setLanguage(value: string, el: HTMLElement): void {
   if (!t) t = WORDS.uk;
 
   const tabNames: Record<string, string> = {
-    homework: t.hw, grades: t.grades, news: t.news, schedule: t.schedule, summary: t.summary, materials: t.materials,
+    homework: t.hw, grades: t.grades, schedule: t.schedule, summary: t.summary, materials: t.materials,
   };
   const navItems = document.querySelectorAll(".da-nav-item");
   for (let i = 0; i < navItems.length; i++) {
@@ -210,8 +210,7 @@ function setLanguage(value: string, el: HTMLElement): void {
   const titles = document.querySelectorAll(".da-panel-title");
   for (let i = 0; i < titles.length; i++) {
     const text = (titles[i].textContent || "").trim();
-    if (text === "Новини класу" || text === "Class News" || text === "Новости класса") titles[i].textContent = t.panelNews;
-    else if (text === "Розклад" || text === "Schedule" || text === "Расписание") titles[i].textContent = t.panelSchedule;
+    if (text === "Розклад" || text === "Schedule" || text === "Расписание") titles[i].textContent = t.panelSchedule;
     else if (text === "Завдання" || text === "Homework" || text === "Задания") titles[i].textContent = t.panelHomework;
     else if (text === "Оцінки" || text === "Grades" || text === "Оценки") titles[i].textContent = t.panelGrades;
     else if (text === "Середній бал і підсумкові оцінки" || text === "GPA & Final Grades" || text === "Средний балл и итоговые оценки") titles[i].textContent = t.panelSummary;

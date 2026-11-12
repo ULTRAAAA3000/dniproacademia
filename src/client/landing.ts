@@ -83,6 +83,10 @@ nbg.addEventListener("click", () => {
   }
 });
 drc.addEventListener("click", closeDrawer);
+const drawerLinks = document.querySelectorAll(".drw a");
+for (let i = 0; i < drawerLinks.length; i++) {
+  drawerLinks[i].addEventListener("click", closeDrawer);
+}
 novl.addEventListener("click", closeDrawer);
 
 const drawerButtons = document.querySelectorAll<HTMLElement>(".drt");
