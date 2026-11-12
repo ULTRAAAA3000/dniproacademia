@@ -11,6 +11,9 @@ const TABS: [string, string][] = [
   ["audit", "Журнал дій"],
 ];
 
+// Вкладки, які сховані з меню (за прямим посиланням вони відкриваються як раніше)
+const HIDDEN_TABS = ["settings", "security", "audit"];
+
 const ACTION_LABELS: Record<string, [string, string]> = {
   add: ["Додано", "#16a085"],
   edit: ["Змінено", "#d68910"],
@@ -534,6 +537,7 @@ export async function renderAdminPage(env: Env, url: URL): Promise<string> {
 
   let nav = "";
   for (let i = 0; i < TABS.length; i++) {
+    if (HIDDEN_TABS.indexOf(TABS[i][0]) !== -1) continue;
     let active = "";
     if (tab === TABS[i][0]) active = "da-tab--active";
     nav += '<a href="' + esc(tabLink(TABS[i][0], {})) + '" class="da-tab ' + active + '">' + TABS[i][1] + "</a>";

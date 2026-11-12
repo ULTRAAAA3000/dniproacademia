@@ -810,6 +810,7 @@ function updateHeaderBadge(count: number): void {
 }
 
 function showToast(name: string, text: string, otherId: number): void {
+  if (!byId("da-chat-btn") && !byId("da-chat-wrap")) return;
   if (chatId && chatOtherId === otherId) return;
 
   const old = byId("da-chat-toast-" + otherId);
