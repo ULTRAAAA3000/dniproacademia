@@ -297,6 +297,18 @@ async function handleDeleteHomework(ctx: Ctx, form: FormData, user: User): Promi
   return jsonResponse({ ok: true });
 }
 
+async function handleLiveCheck(ctx: Ctx, form: FormData, user: User): Promise<Response> {
+  if (user.role !== "student") return fail("Доступ заборонено.");
+  let classId = toInt(str(form, "class_id"));
+  if (!classId) {
+    const classes = await db.getUserClasses(ctx.env.DB, user.id);
+    if (classes.length > 0) classId = classes[0].id;
+  }
+  if (!(await canUseClass(ctx.env, user, classId))) return denied();
+  const sig = await db.getLiveSignature(ctx.env.DB, user.id, classId);
+  return jsonResponse({ ok: true, sig: sig });
+}
+
 async function handleGetGrades(ctx: Ctx, form: FormData, user: User): Promise<Response> {
   const classId = await pickClassId(form, user);
   if (!(await canUseClass(ctx.env, user, classId))) return denied();
@@ -677,6 +689,7 @@ const userHandlers: Record<string, UserHandler> = {
   edit_homework: handleEditHomework,
   delete_homework: handleDeleteHomework,
   get_grades: handleGetGrades,
+  live_check: handleLiveCheck,
   add_grade: handleAddGrade,
   edit_grade: handleEditGrade,
   delete_grade: handleDeleteGrade,

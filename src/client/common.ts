@@ -109,7 +109,7 @@ export function removeSmoothly(el: HTMLElement | null): void {
   }, 260);
 }
 
-export function getConfig(): { user_id: number; max_file_mb: number } {
+export function getConfig(): { user_id: number; max_file_mb: number; role?: string } {
   const el = document.getElementById("da-config");
   if (!el) return { user_id: 0, max_file_mb: 15 };
   try {
