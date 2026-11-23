@@ -264,7 +264,6 @@ async function tabSettings(env: Env, url: URL): Promise<string> {
   const maxSize = parseInt(await db.getSetting(env.DB, "max_file_size", "15"), 10) || 15;
   const autoCleanup = await db.getSetting(env.DB, "auto_cleanup", "1");
   const cleanupDays = parseInt(await db.getSetting(env.DB, "cleanup_days", "30"), 10) || 30;
-  const chatDays = parseInt(await db.getSetting(env.DB, "chat_cleanup_days", "60"), 10);
   const lastCleanup = await db.getSetting(env.DB, "last_cleanup", "—");
   const lastCount = parseInt(await db.getSetting(env.DB, "last_cleanup_count", "0"), 10);
 
@@ -296,9 +295,6 @@ async function tabSettings(env: Env, url: URL): Promise<string> {
 
     '<div class="da-section"><h2 class="da-section-title">Завантаження файлів</h2><table class="da-settings-table"><tr><td class="da-settings-label">Максимальний розмір файлу (МБ)</td><td>' +
     '<input type="number" name="max_file_size" value="' + maxSize + '" min="1" max="100" class="da-input" style="width:100px"></td></tr></table></div>' +
-
-    '<div class="da-section"><h2 class="da-section-title">Автовидалення повідомлень чату</h2><table class="da-settings-table"><tr><td class="da-settings-label">Видаляти повідомлення старіші за (днів)</td><td>' +
-    '<input type="number" name="chat_cleanup_days" value="' + chatDays + '" min="0" max="365" class="da-input" style="width:100px"></td></tr></table></div>' +
 
     '<div class="da-section"><h2 class="da-section-title">Автоматичне очищення файлів завдань</h2><table class="da-settings-table">' +
     '<tr><td class="da-settings-label">Увімкнути автоочищення</td><td><label class="da-toggle"><input type="checkbox" name="auto_cleanup" ' + checked(autoCleanup) + '><span class="da-toggle-slider"></span></label>' +

@@ -926,13 +926,10 @@ export async function handleAdminApi(ctx: Ctx, name: string): Promise<Response> 
     if (maxFile > 100) maxFile = 100;
     let cleanupDays = toInt(str(form, "cleanup_days")) || 30;
     if (cleanupDays < 1) cleanupDays = 1;
-    let chatDays = toInt(str(form, "chat_cleanup_days"));
-    if (chatDays < 0) chatDays = 0;
 
     await db.setSetting(env.DB, "max_file_size", String(maxFile));
     await db.setSetting(env.DB, "auto_cleanup", str(form, "auto_cleanup") ? "1" : "0");
     await db.setSetting(env.DB, "cleanup_days", String(cleanupDays));
-    await db.setSetting(env.DB, "chat_cleanup_days", String(chatDays));
 
     if (str(form, "manual_cleanup")) {
       const count = await runCleanup(env);
