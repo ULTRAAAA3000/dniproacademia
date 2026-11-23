@@ -677,3 +677,18 @@ export async function getClassSubjectGrades(db: D1Database, classId: number, sub
     .all<GradeRow>();
   return r.results;
 }
+
+export async function getLiveSignature(db: D1Database, studentId: number, classId: number): Promise<string> {
+  const row = await db
+    .prepare(
+      "SELECT " +
+        "(SELECT COUNT(*) || '-' || COALESCE(MAX(id), 0) FROM homework WHERE class_id = ?1) AS hw, " +
+        "(SELECT COUNT(*) || '-' || COALESCE(MAX(id), 0) FROM materials WHERE class_id = ?1) AS mat, " +
+        "(SELECT COUNT(*) || '-' || COALESCE(MAX(id), 0) || '-' || COALESCE(SUM(grade), 0) FROM grades WHERE student_id = ?2 AND class_id = ?1) AS gr, " +
+        "(SELECT COUNT(*) || '-' || COALESCE(MAX(id), 0) || '-' || COALESCE(SUM(grade), 0) FROM final_grades WHERE student_id = ?2 AND class_id = ?1) AS fin"
+    )
+    .bind(classId, studentId)
+    .first<{ hw: string; mat: string; gr: string; fin: string }>();
+  if (!row) return "";
+  return row.hw + "|" + row.mat + "|" + row.gr + "|" + row.fin;
+}

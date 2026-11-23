@@ -760,7 +760,7 @@ export async function renderCabinetPage(env: Env, url: URL, user: User): Promise
   }
 
   const maxMb = parseInt(await db.getSetting(env.DB, "max_file_size", "15"), 10) || 15;
-  const config = JSON.stringify({ user_id: user.id, max_file_mb: maxMb });
+  const config = JSON.stringify({ user_id: user.id, max_file_mb: maxMb, role: user.role });
 
   return (
     '<!DOCTYPE html><html lang="uk"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">' +
