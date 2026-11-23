@@ -29,28 +29,6 @@ export async function runCleanup(env: Env): Promise<number> {
     }
   }
 
-  const chatDays = parseInt(await db.getSetting(env.DB, "chat_cleanup_days", "60"), 10);
-  if (chatDays > 0) {
-    const chatCutoff = sqlDaysAgo(chatDays);
-    const oldMessages = await env.DB
-      .prepare("SELECT id, file_path FROM messages WHERE is_deleted = 0 AND created_at < ?")
-      .bind(chatCutoff)
-      .all<{ id: number; file_path: string | null }>();
-
-    for (let i = 0; i < oldMessages.results.length; i++) {
-      const msg = oldMessages.results[i];
-      if (msg.file_path) {
-        await env.FILES.delete("chat/" + msg.file_path);
-      }
-      await env.DB
-        .prepare(
-          "UPDATE messages SET is_deleted = 1, body = NULL, file_path = NULL, file_name = '[видалено автоматично]' WHERE id = ?"
-        )
-        .bind(msg.id)
-        .run();
-    }
-  }
-
   await db.setSetting(env.DB, "last_cleanup", nowSql());
   await db.setSetting(env.DB, "last_cleanup_count", String(filesCount));
   await db.setSetting(env.DB, "last_cleanup_run", String(nowSeconds()));
