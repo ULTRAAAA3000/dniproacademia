@@ -11,9 +11,6 @@ const TABS: [string, string][] = [
   ["audit", "Журнал дій"],
 ];
 
-// Вкладки, які сховані з меню (за прямим посиланням вони відкриваються як раніше)
-const HIDDEN_TABS = ["settings", "security", "audit"];
-
 const ACTION_LABELS: Record<string, [string, string]> = {
   add: ["Додано", "#16a085"],
   edit: ["Змінено", "#d68910"],
@@ -302,20 +299,18 @@ async function tabSettings(env: Env, url: URL): Promise<string> {
     statCard("Матеріали вчителів", materials.count + " файлів", formatSize(materials.size)) +
     statCard("Файли чату", chat.count + " файлів", formatSize(chat.size)) +
     statCard("Разом", formatSize(submissions.size + materials.size + chat.size), "Останнє очищення: " + esc(lastText)) +
-    '</div><div style="background:#f2faf9;border:1px solid #deecea;border-radius:8px;padding:12px 16px;font-size:13px;color:#2d4742;line-height:1.7;">' +
-    "<strong>Як це працює:</strong><br><strong>Здачі ДЗ</strong> — старі файли видаляються через N днів. Запис про здачу та оцінку <em>зберігається</em> назавжди.<br>" +
-    "<strong>Матеріали вчителів</strong> — docx/pptx вже є стиснутими форматами. Ці файли <em>не видаляються автоматично</em>.</div></div>" +
+    '</div></div>' +
 
     '<div class="da-section"><h2 class="da-section-title">Завантаження файлів</h2><table class="da-settings-table"><tr><td class="da-settings-label">Максимальний розмір файлу (МБ)</td><td>' +
-    '<input type="number" name="max_file_size" value="' + maxSize + '" min="1" max="100" class="da-input" style="width:100px"><span class="da-settings-hint">Рекомендовано: 15 МБ.</span></td></tr></table></div>' +
+    '<input type="number" name="max_file_size" value="' + maxSize + '" min="1" max="100" class="da-input" style="width:100px"></td></tr></table></div>' +
 
     '<div class="da-section"><h2 class="da-section-title">Автовидалення повідомлень чату</h2><table class="da-settings-table"><tr><td class="da-settings-label">Видаляти повідомлення старіші за (днів)</td><td>' +
-    '<input type="number" name="chat_cleanup_days" value="' + chatDays + '" min="0" max="365" class="da-input" style="width:100px"><span class="da-settings-hint">Встановіть 0 — вимкнути.</span></td></tr></table></div>' +
+    '<input type="number" name="chat_cleanup_days" value="' + chatDays + '" min="0" max="365" class="da-input" style="width:100px"></td></tr></table></div>' +
 
     '<div class="da-section"><h2 class="da-section-title">Автоматичне очищення файлів завдань</h2><table class="da-settings-table">' +
     '<tr><td class="da-settings-label">Увімкнути автоочищення</td><td><label class="da-toggle"><input type="checkbox" name="auto_cleanup" ' + checked(autoCleanup) + '><span class="da-toggle-slider"></span></label>' +
-    '<span class="da-settings-hint">Тільки файли здач ДЗ. Матеріали вчителів не зачіпаються.</span></td></tr>' +
-    '<tr><td class="da-settings-label">Видаляти файли старіші за (днів)</td><td><input type="number" name="cleanup_days" value="' + cleanupDays + '" min="1" max="365" class="da-input" style="width:100px"><span class="da-settings-hint">Запис про здачу та оцінку зберігається.</span></td></tr>' +
+    '</td></tr>' +
+    '<tr><td class="da-settings-label">Видаляти файли старіші за (днів)</td><td><input type="number" name="cleanup_days" value="' + cleanupDays + '" min="1" max="365" class="da-input" style="width:100px"></td></tr>' +
     '<tr><td class="da-settings-label">Статус останнього очищення</td><td><span style="font-size:13px;color:#6b8f89;">' + esc(lastText) + (lastCount ? " · Видалено файлів: " + lastCount : "") + "</span></td></tr></table>" +
     '<div style="margin-top:16px;display:flex;gap:10px;align-items:center;"><button type="submit" name="save" value="1" class="da-btn da-btn--teal">Зберегти налаштування</button>' +
     '<button type="submit" name="manual_cleanup" value="1" class="da-btn" data-confirm="Запустити очищення зараз? Старі файли буде видалено.">Запустити очищення зараз</button></div></div></form>'
@@ -346,13 +341,13 @@ async function tabSecurity(env: Env, url: URL): Promise<string> {
     notice +
     '<div class="da-section"><h2 class="da-section-title">Захист від спаму при реєстрації</h2><form method="post" action="/api/admin/save_security"><table class="da-settings-table">' +
     '<tr><td class="da-settings-label">Обмеження реєстрації по IP</td><td><label class="da-toggle"><input type="checkbox" name="reg_limit_enabled" ' + checked(limitEnabled) +
-    '><span class="da-toggle-slider"></span></label><span class="da-settings-hint">Одна реєстрація з однієї IP за вказаний період</span></td></tr>' +
+    '><span class="da-toggle-slider"></span></label></td></tr>' +
     '<tr><td class="da-settings-label">Інтервал блокування (днів)</td><td><input type="number" name="reg_limit_days" value="' + limitDays + '" min="1" max="365" class="da-input" style="width:100px"></td></tr>' +
     '<tr><td class="da-settings-label" style="padding-top:16px;border-top:1px solid #eee;">Cloudflare Turnstile — Site Key</td><td style="padding-top:16px;border-top:1px solid #eee;">' +
-    '<input type="text" name="turnstile_site_key" value="' + esc(siteKey) + '" class="da-input" style="width:340px" placeholder="0x4AAAA..."><span class="da-settings-hint">Залиште порожнім — CAPTCHA вимкнена.</span></td></tr>' +
+    '<input type="text" name="turnstile_site_key" value="' + esc(siteKey) + '" class="da-input" style="width:340px" placeholder="0x4AAAA..."></td></tr>' +
     '<tr><td class="da-settings-label">Cloudflare Turnstile — Secret Key</td><td><input type="text" name="turnstile_secret" value="' + esc(secret) + '" class="da-input" style="width:340px" placeholder="0x4AAAA..."></td></tr>' +
     '<tr><td class="da-settings-label" style="padding-top:16px;border-top:1px solid #eee;">Алерт адміну при N невдалих входах/год</td><td style="padding-top:16px;border-top:1px solid #eee;">' +
-    '<input type="number" name="fail_alert_threshold" value="' + threshold + '" min="0" max="100" class="da-input" style="width:80px"><span class="da-settings-hint">0 — вимкнути.</span></td></tr></table>' +
+    '<input type="number" name="fail_alert_threshold" value="' + threshold + '" min="0" max="100" class="da-input" style="width:80px"></td></tr></table>' +
     '<button type="submit" class="da-btn da-btn--teal" style="margin-top:12px">Зберегти</button></form></div>';
 
   html += '<div class="da-section" style="margin-top:24px"><h2 class="da-section-title">Підозріла активність (остання година)</h2>';
@@ -537,7 +532,6 @@ export async function renderAdminPage(env: Env, url: URL): Promise<string> {
 
   let nav = "";
   for (let i = 0; i < TABS.length; i++) {
-    if (HIDDEN_TABS.indexOf(TABS[i][0]) !== -1) continue;
     let active = "";
     if (tab === TABS[i][0]) active = "da-tab--active";
     nav += '<a href="' + esc(tabLink(TABS[i][0], {})) + '" class="da-tab ' + active + '">' + TABS[i][1] + "</a>";
