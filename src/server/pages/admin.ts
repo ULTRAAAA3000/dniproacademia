@@ -31,13 +31,6 @@ const ENTITY_LABELS: Record<string, string> = {
   schedule: "Розклад",
 };
 
-const FAIL_LABELS: Record<string, [string, string]> = {
-  bad_password: ["Невірний пароль", "#d68910"],
-  user_not_found: ["Акаунт не знайдено", "#2980b9"],
-  bad_recovery: ["Невірне кодове слово", "#d35400"],
-  admin_bad_password: ["Невірний пароль адміна", "#c0392b"],
-};
-
 function shell(title: string, body: string, withScript: boolean): string {
   let script = "";
   if (withScript) script = '<script src="/assets/admin.js"></script>';
@@ -323,16 +316,7 @@ async function tabSecurity(env: Env, url: URL): Promise<string> {
   const siteKey = await db.getSetting(env.DB, "turnstile_site_key", "");
   const secret = await db.getSetting(env.DB, "turnstile_secret", "");
   const threshold = parseInt(await db.getSetting(env.DB, "fail_alert_threshold", "10"), 10) || 0;
-
-  const blacklist = await db.getBlacklist(env.DB);
   const regLog = await db.getRegLog(env.DB, 100);
-  let suspiciousLimit = 5;
-  if (threshold > 0) suspiciousLimit = threshold;
-  const suspicious = await db.getSuspiciousIps(env.DB, suspiciousLimit, 60);
-  const fails = await db.getLoginFails(env.DB, 100);
-
-  const blocked: Record<string, boolean> = {};
-  for (let i = 0; i < blacklist.length; i++) blocked[blacklist[i].ip] = true;
 
   let notice = "";
   if (url.searchParams.get("saved")) notice = '<div class="notice notice-success is-dismissible"><p>Налаштування збережено.</p></div>';
@@ -340,7 +324,7 @@ async function tabSecurity(env: Env, url: URL): Promise<string> {
   let html =
     notice +
     '<div class="da-section"><h2 class="da-section-title">Захист від спаму при реєстрації</h2><form method="post" action="/api/admin/save_security"><table class="da-settings-table">' +
-    '<tr><td class="da-settings-label">Обмеження реєстрації по IP</td><td><label class="da-toggle"><input type="checkbox" name="reg_limit_enabled" ' + checked(limitEnabled) +
+    '<tr><td class="da-settings-label">Обмеження реєстрації</td><td><label class="da-toggle"><input type="checkbox" name="reg_limit_enabled" ' + checked(limitEnabled) +
     '><span class="da-toggle-slider"></span></label></td></tr>' +
     '<tr><td class="da-settings-label">Інтервал блокування (днів)</td><td><input type="number" name="reg_limit_days" value="' + limitDays + '" min="1" max="365" class="da-input" style="width:100px"></td></tr>' +
     '<tr><td class="da-settings-label" style="padding-top:16px;border-top:1px solid #eee;">Cloudflare Turnstile — Site Key</td><td style="padding-top:16px;border-top:1px solid #eee;">' +
@@ -350,79 +334,18 @@ async function tabSecurity(env: Env, url: URL): Promise<string> {
     '<input type="number" name="fail_alert_threshold" value="' + threshold + '" min="0" max="100" class="da-input" style="width:80px"></td></tr></table>' +
     '<button type="submit" class="da-btn da-btn--teal" style="margin-top:12px">Зберегти</button></form></div>';
 
-  html += '<div class="da-section" style="margin-top:24px"><h2 class="da-section-title">Підозріла активність (остання година)</h2>';
-  if (suspicious.length === 0) {
-    html += '<div class="da-empty" style="padding:12px 0;">Підозрілої активності не виявлено.</div>';
-  } else {
-    html += '<table class="da-table" style="width:100%"><thead><tr><th>IP</th><th>Невдалих спроб</th><th>Остання спроба</th><th></th></tr></thead><tbody>';
-    for (let i = 0; i < suspicious.length; i++) {
-      const s = suspicious[i];
-      let action = '<button class="da-btn da-btn--xs da-btn--red" data-action="bl_add" data-ip="' + esc(s.ip) + '">Заблокувати IP</button>';
-      if (blocked[s.ip]) action = '<span style="font-size:12px;color:#888">Вже заблоковано</span>';
-      html +=
-        '<tr style="background:#fff8f8"><td><code style="color:#c0392b">' + esc(s.ip) + '</code></td><td><span style="font-weight:700;color:#c0392b">' + s.fails + "</span></td><td>" +
-        fmtDateTime(s.last_fail) + "</td><td>" + action + "</td></tr>";
-    }
-    html += "</tbody></table>";
-  }
-  html += "</div>";
-
-  html += '<div class="da-section" style="margin-top:24px"><h2 class="da-section-title">Останні невдалі спроби входу</h2>';
-  if (fails.length === 0) {
-    html += '<div class="da-empty" style="padding:12px 0;">Невдалих спроб не зафіксовано.</div>';
-  } else {
-    html += '<div style="overflow-x:auto"><table class="da-table" style="width:100%;font-size:12px"><thead><tr><th>IP</th><th>Email</th><th>Причина</th><th>Час</th></tr></thead><tbody>';
-    for (let i = 0; i < fails.length; i++) {
-      const f = fails[i];
-      let label = f.reason;
-      let color = "#888";
-      if (FAIL_LABELS[f.reason]) {
-        label = FAIL_LABELS[f.reason][0];
-        color = FAIL_LABELS[f.reason][1];
-      }
-      let email = "—";
-      if (f.email) email = f.email;
-      html +=
-        "<tr><td><code>" + esc(f.ip) + "</code></td><td>" + esc(email) + '</td><td><span style="color:' + color + ';font-weight:600">' + esc(label) + "</span></td><td>" + fmtDateTimeSec(f.created_at) + "</td></tr>";
-    }
-    html += "</tbody></table></div>";
-  }
-  html += "</div>";
-
-  html +=
-    '<div class="da-section" style="margin-top:24px"><h2 class="da-section-title">Чорний список IP</h2><div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">' +
-    '<input type="text" id="bl-ip" placeholder="IP адреса" class="da-input" style="width:180px"><input type="text" id="bl-reason" placeholder="Причина (необов\'язково)" class="da-input" style="width:220px">' +
-    '<button class="da-btn da-btn--red" data-action="bl_add_form">Додати в чорний список</button></div><div id="da-blacklist-table">';
-  if (blacklist.length === 0) {
-    html += '<div class="da-empty">Чорний список порожній</div>';
-  } else {
-    html += '<table class="da-table" style="width:100%"><thead><tr><th>IP</th><th>Причина</th><th>Ким заблоковано</th><th>Дата</th><th></th></tr></thead><tbody>';
-    for (let i = 0; i < blacklist.length; i++) {
-      const b = blacklist[i];
-      let reason = "—";
-      if (b.reason) reason = b.reason;
-      html +=
-        '<tr data-ip="' + esc(b.ip) + '"><td><code>' + esc(b.ip) + "</code></td><td>" + esc(reason) + "</td><td>Адмін</td><td>" + fmtDateTime(b.blocked_at) +
-        '</td><td><button class="da-btn da-btn--xs da-btn--red" data-action="bl_remove" data-ip="' + esc(b.ip) + '">Видалити</button></td></tr>';
-    }
-    html += "</tbody></table>";
-  }
-  html += "</div></div>";
-
   html += '<div class="da-section" style="margin-top:24px"><h2 class="da-section-title">Журнал реєстрацій</h2>';
   if (regLog.length === 0) {
     html += '<div class="da-empty">Реєстрацій ще не було</div>';
   } else {
-    html += '<table class="da-table" style="width:100%"><thead><tr><th>IP</th><th>Користувач</th><th>Email</th><th>Дата</th><th></th></tr></thead><tbody>';
+    html += '<table class="da-table" style="width:100%"><thead><tr><th>Користувач</th><th>Email</th><th>Дата</th></tr></thead><tbody>';
     for (let i = 0; i < regLog.length; i++) {
       const r = regLog[i];
       let userName = "—";
       if (r.user_name) userName = r.user_name;
       let email = "—";
       if (r.email) email = r.email;
-      let action = '<button class="da-btn da-btn--xs da-btn--red" data-action="bl_add" data-ip="' + esc(r.ip) + '">Заблокувати IP</button>';
-      if (blocked[r.ip]) action = '<span style="font-size:11px;color:#c0392b;font-weight:700;">В ЧС</span>';
-      html += "<tr><td><code>" + esc(r.ip) + "</code></td><td>" + esc(userName) + "</td><td>" + esc(email) + "</td><td>" + fmtDateTime(r.registered_at) + "</td><td>" + action + "</td></tr>";
+      html += "<tr><td>" + esc(userName) + "</td><td>" + esc(email) + "</td><td>" + fmtDateTime(r.registered_at) + "</td></tr>";
     }
     html += "</tbody></table>";
   }
@@ -466,7 +389,7 @@ async function tabAudit(env: Env, url: URL): Promise<string> {
   }
 
   html +=
-    '<div style="overflow-x:auto"><table class="da-audit-table"><thead><tr><th>Час</th><th>Користувач</th><th>Дія</th><th>Об\'єкт</th><th>Деталі</th><th>IP</th></tr></thead><tbody>';
+    '<div style="overflow-x:auto"><table class="da-audit-table"><thead><tr><th>Час</th><th>Користувач</th><th>Дія</th><th>Об\'єкт</th><th>Деталі</th></tr></thead><tbody>';
   for (let i = 0; i < result.rows.length; i++) {
     const log = result.rows[i];
     let label = log.action;
@@ -487,8 +410,7 @@ async function tabAudit(env: Env, url: URL): Promise<string> {
       '<td><span style="font-weight:600">' + esc(log.user_name) + '</span><br><span style="font-size:11px;color:#888">' + esc(log.role) + "</span></td>" +
       '<td><span class="da-audit-badge" style="background:' + color + '">' + esc(label) + "</span></td>" +
       '<td><span class="da-audit-entity">' + esc(entity) + "</span>" + entityId + "</td>" +
-      '<td><span class="da-audit-details" title="' + esc(details) + '">' + esc(details) + "</span></td>" +
-      '<td><span class="da-audit-ip">' + esc(log.ip) + "</span></td></tr>";
+      '<td><span class="da-audit-details" title="' + esc(details) + '">' + esc(details) + "</span></td></tr>";
   }
   html += "</tbody></table></div>";
 

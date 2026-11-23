@@ -150,28 +150,6 @@ async function handleAction(button: HTMLElement): Promise<void> {
     } else {
       toast(r.msg || "Помилка", false);
     }
-  } else if (action === "bl_add" || action === "bl_add_form") {
-    let ip = button.dataset.ip || "";
-    if (!ip) ip = value("bl-ip").trim();
-    if (!ip) {
-      alert("Введіть IP");
-      return;
-    }
-    const r = await request("ip_blacklist_add", { ip: ip, reason: value("bl-reason").trim() });
-    if (r.ok) {
-      location.reload();
-    } else {
-      alert(r.msg || "Помилка");
-    }
-  } else if (action === "bl_remove") {
-    const ip = button.dataset.ip || "";
-    if (!confirm("Видалити " + ip + " з чорного списку?")) return;
-    const r = await request("ip_blacklist_remove", { ip: ip });
-    if (r.ok) {
-      button.closest("tr")?.remove();
-    } else {
-      alert(r.msg || "Помилка");
-    }
   }
 }
 
