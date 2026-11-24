@@ -1,6 +1,6 @@
 import type { Env, User, ClassRow, HomeworkRow, GradeRow, ScheduleRow } from "../types";
 import * as db from "../db";
-import { esc, nl2br, fmtDate, fmtDateTime, todayKyiv, fileExt, uniqueSorted } from "../utils";
+import { esc, nl2br, fmtDate, fmtDateTime, todayKyiv, daysLeft, fileExt, uniqueSorted } from "../utils";
 
 function icon(paths: string, size = 16): string {
   return (
@@ -222,6 +222,12 @@ function scheduleView(schedule: ScheduleRow[], overall: number): string {
 function homeworkCard(h: HomeworkRow, today: string, showTeacher: boolean, actions: string): string {
   let overdue = "";
   if (h.deadline < today) overdue = "da-card--overdue";
+  const left = daysLeft(h.deadline, today);
+  let badge = "";
+  if (left < 0 && left >= -7) badge = '<span class="da-dl da-dl--over">Прострочено на ' + (0 - left) + " дн.</span>";
+  else if (left === 0) badge = '<span class="da-dl da-dl--soon">Сьогодні!</span>';
+  else if (left === 1) badge = '<span class="da-dl da-dl--soon">Завтра</span>';
+  else if (left > 1 && left <= 7) badge = '<span class="da-dl">Через ' + left + " дн.</span>";
   let desc = "";
   if (h.description) desc = '<div class="da-card-desc">' + nl2br(h.description) + "</div>";
   let footer = "";
@@ -233,7 +239,7 @@ function homeworkCard(h: HomeworkRow, today: string, showTeacher: boolean, actio
   return (
     '<div class="da-card da-card--hw ' + overdue + '" id="hw-' + h.id + '"><div class="da-card-head"><span class="da-card-subject">' + esc(h.subject) +
     '</span><div class="da-hw-actions" style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><span class="da-card-date">До: ' + fmtDate(h.deadline) +
-    "</span>" + actions + '</div></div><div class="da-card-topic">' + esc(h.topic) + "</div>" + desc +
+    "</span>" + badge + actions + '</div></div><div class="da-card-topic">' + esc(h.topic) + "</div>" + desc +
     '<div class="da-card-footer">' + footer + "</div></div>"
   );
 }
@@ -253,6 +259,12 @@ async function studentHomework(env: Env, url: URL, classId: number): Promise<str
   }
 
   const today = todayKyiv();
+  let burning = 0;
+  for (let i = 0; i < all.length; i++) {
+    const left = daysLeft(all[i].deadline, today);
+    if (left === 0 || left === 1) burning++;
+  }
+  if (burning > 0) html += '<div class="da-dl-banner">Горять завдання: ' + burning + " (на сьогодні або завтра)</div>";
   html += '<div class="da-hw-list">';
   for (let i = 0; i < all.length; i++) {
     if (filter && all[i].subject !== filter) continue;

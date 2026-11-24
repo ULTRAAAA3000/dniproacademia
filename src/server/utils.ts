@@ -105,6 +105,12 @@ export function todayKyiv(): string {
   return p.year + "-" + p.month + "-" + p.day;
 }
 
+export function daysLeft(deadline: string, today: string): number {
+  const a = Date.parse(deadline.slice(0, 10) + "T00:00:00Z");
+  const b = Date.parse(today + "T00:00:00Z");
+  return Math.round((a - b) / 86400000);
+}
+
 export function getIp(request: Request): string {
   const cf = request.headers.get("CF-Connecting-IP");
   if (cf) return cf.trim();

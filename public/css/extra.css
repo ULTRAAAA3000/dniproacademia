@@ -7,3 +7,10 @@ body{font-family:'Manrope',system-ui,sans-serif}
 .da-view-tabs{display:none}
 .da-toast{position:fixed;top:20px;right:20px;z-index:99999;padding:10px 18px;color:#fff;border-radius:8px;font-size:13px;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 #da-settings-drawer:not(.open){box-shadow:none}
+.da-dl{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;background:#e8f5f3;color:#1a6b5e;white-space:nowrap}
+.da-dl--soon{background:#fff3e0;color:#b45309}
+.da-dl--over{background:#fdf3f2;color:#c0392b}
+.da-dl-banner{margin-bottom:14px;padding:10px 14px;border-radius:10px;background:#fff3e0;color:#b45309;font-size:14px;font-weight:600}
+.da-dark .da-dl{background:#374151;color:#d1d5db}
+.da-dark .da-dl--soon,.da-dark .da-dl-banner{background:#4a3a1a;color:#fbbf24}
+.da-dark .da-dl--over{background:#4a2020;color:#f87171}
