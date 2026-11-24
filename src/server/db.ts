@@ -173,13 +173,13 @@ export async function getAvgBySubject(
   db: D1Database,
   studentId: number,
   classId: number
-): Promise<{ subject: string; avg_grade: number }[]> {
+): Promise<{ subject: string; avg_grade: number; total: number; cnt: number }[]> {
   const r = await db
     .prepare(
-      "SELECT subject, ROUND(AVG(grade), 2) AS avg_grade FROM grades WHERE student_id = ? AND class_id = ? GROUP BY subject ORDER BY subject"
+      "SELECT subject, ROUND(AVG(grade), 2) AS avg_grade, SUM(grade) AS total, COUNT(*) AS cnt FROM grades WHERE student_id = ? AND class_id = ? GROUP BY subject ORDER BY subject"
     )
     .bind(studentId, classId)
-    .all<{ subject: string; avg_grade: number }>();
+    .all<{ subject: string; avg_grade: number; total: number; cnt: number }>();
   return r.results;
 }
 

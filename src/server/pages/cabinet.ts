@@ -1,6 +1,6 @@
 import type { Env, User, ClassRow, HomeworkRow, GradeRow, ScheduleRow } from "../types";
 import * as db from "../db";
-import { esc, nl2br, fmtDate, fmtDateTime, todayKyiv, fileExt, uniqueSorted } from "../utils";
+import { esc, nl2br, fmtDate, fmtDateTime, todayKyiv, daysLeft, fileExt, uniqueSorted } from "../utils";
 
 function icon(paths: string, size = 16): string {
   return (
@@ -222,6 +222,12 @@ function scheduleView(schedule: ScheduleRow[], overall: number): string {
 function homeworkCard(h: HomeworkRow, today: string, showTeacher: boolean, actions: string): string {
   let overdue = "";
   if (h.deadline < today) overdue = "da-card--overdue";
+  const left = daysLeft(h.deadline, today);
+  let badge = "";
+  if (left < 0 && left >= -7) badge = '<span class="da-dl da-dl--over">Прострочено на ' + (0 - left) + " дн.</span>";
+  else if (left === 0) badge = '<span class="da-dl da-dl--soon">Сьогодні!</span>';
+  else if (left === 1) badge = '<span class="da-dl da-dl--soon">Завтра</span>';
+  else if (left > 1 && left <= 7) badge = '<span class="da-dl">Через ' + left + " дн.</span>";
   let desc = "";
   if (h.description) desc = '<div class="da-card-desc">' + nl2br(h.description) + "</div>";
   let footer = "";
@@ -233,7 +239,7 @@ function homeworkCard(h: HomeworkRow, today: string, showTeacher: boolean, actio
   return (
     '<div class="da-card da-card--hw ' + overdue + '" id="hw-' + h.id + '"><div class="da-card-head"><span class="da-card-subject">' + esc(h.subject) +
     '</span><div class="da-hw-actions" style="display:flex;align-items:center;gap:6px;flex-shrink:0;"><span class="da-card-date">До: ' + fmtDate(h.deadline) +
-    "</span>" + actions + '</div></div><div class="da-card-topic">' + esc(h.topic) + "</div>" + desc +
+    "</span>" + badge + actions + '</div></div><div class="da-card-topic">' + esc(h.topic) + "</div>" + desc +
     '<div class="da-card-footer">' + footer + "</div></div>"
   );
 }
@@ -253,6 +259,12 @@ async function studentHomework(env: Env, url: URL, classId: number): Promise<str
   }
 
   const today = todayKyiv();
+  let burning = 0;
+  for (let i = 0; i < all.length; i++) {
+    const left = daysLeft(all[i].deadline, today);
+    if (left === 0 || left === 1) burning++;
+  }
+  if (burning > 0) html += '<div class="da-dl-banner">Горять завдання: ' + burning + " (на сьогодні або завтра)</div>";
   html += '<div class="da-hw-list">';
   for (let i = 0; i < all.length; i++) {
     if (filter && all[i].subject !== filter) continue;
@@ -291,6 +303,21 @@ async function studentGrades(env: Env, url: URL, user: User, classId: number): P
   return html + '<div class="da-grades-list" id="da-grades-list">' + gradeCards(shown) + "</div></div>";
 }
 
+function calcPanel(avgs: { subject: string; total: number; cnt: number }[]): string {
+  if (avgs.length === 0) return "";
+  let options = "";
+  for (let i = 0; i < avgs.length; i++) {
+    options += '<option value="' + i + '" data-sum="' + avgs[i].total + '" data-count="' + avgs[i].cnt + '">' + esc(avgs[i].subject) + "</option>";
+  }
+  return (
+    '<div class="da-panel da-calc"><h2 class="da-panel-title">Калькулятор цілі</h2>' +
+    '<div class="da-calc-row"><label class="da-label">Предмет</label><select class="da-input" id="da-calc-subject">' + options + "</select></div>" +
+    '<div class="da-calc-row"><label class="da-label">Бажаний середній бал</label><input type="number" class="da-input" id="da-calc-goal" min="1" max="12" step="0.1"></div>' +
+    '<div class="da-calc-row"><label class="da-label">А якщо отримаю оцінку</label><input type="number" class="da-input" id="da-calc-what" min="1" max="12" step="1" placeholder="1-12"></div>' +
+    '<div class="da-calc-result" id="da-calc-result"></div></div>'
+  );
+}
+
 async function studentSummary(env: Env, user: User, classId: number): Promise<string> {
   const subjects = await db.getClassSubjects(env.DB, classId);
   const avgs = await db.getAvgBySubject(env.DB, user.id, classId);
@@ -313,7 +340,8 @@ async function studentSummary(env: Env, user: User, classId: number): Promise<st
     if (finalMap[name] !== undefined) finalCell = "<span class='da-final-badge'>" + finalMap[name] + "</span>";
     html += "<tr><td>" + esc(name) + "</td><td>" + avgCell + "</td><td>" + finalCell + "</td></tr>";
   }
-  return html + "</tbody></table></div></div>";
+  html += "</tbody></table></div></div>";
+  return html + calcPanel(avgs);
 }
 
 function materialCard(m: { id: number; title: string; subject: string; filename: string; filepath: string; created_at: string; teacher_name?: string }, mine: boolean): string {
