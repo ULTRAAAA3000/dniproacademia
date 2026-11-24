@@ -303,6 +303,21 @@ async function studentGrades(env: Env, url: URL, user: User, classId: number): P
   return html + '<div class="da-grades-list" id="da-grades-list">' + gradeCards(shown) + "</div></div>";
 }
 
+function calcPanel(avgs: { subject: string; total: number; cnt: number }[]): string {
+  if (avgs.length === 0) return "";
+  let options = "";
+  for (let i = 0; i < avgs.length; i++) {
+    options += '<option value="' + i + '" data-sum="' + avgs[i].total + '" data-count="' + avgs[i].cnt + '">' + esc(avgs[i].subject) + "</option>";
+  }
+  return (
+    '<div class="da-panel da-calc"><h2 class="da-panel-title">Калькулятор цілі</h2>' +
+    '<div class="da-calc-row"><label class="da-label">Предмет</label><select class="da-input" id="da-calc-subject">' + options + "</select></div>" +
+    '<div class="da-calc-row"><label class="da-label">Бажаний середній бал</label><input type="number" class="da-input" id="da-calc-goal" min="1" max="12" step="0.1"></div>' +
+    '<div class="da-calc-row"><label class="da-label">А якщо отримаю оцінку</label><input type="number" class="da-input" id="da-calc-what" min="1" max="12" step="1" placeholder="1-12"></div>' +
+    '<div class="da-calc-result" id="da-calc-result"></div></div>'
+  );
+}
+
 async function studentSummary(env: Env, user: User, classId: number): Promise<string> {
   const subjects = await db.getClassSubjects(env.DB, classId);
   const avgs = await db.getAvgBySubject(env.DB, user.id, classId);
@@ -325,7 +340,8 @@ async function studentSummary(env: Env, user: User, classId: number): Promise<st
     if (finalMap[name] !== undefined) finalCell = "<span class='da-final-badge'>" + finalMap[name] + "</span>";
     html += "<tr><td>" + esc(name) + "</td><td>" + avgCell + "</td><td>" + finalCell + "</td></tr>";
   }
-  return html + "</tbody></table></div></div>";
+  html += "</tbody></table></div></div>";
+  return html + calcPanel(avgs);
 }
 
 function materialCard(m: { id: number; title: string; subject: string; filename: string; filepath: string; created_at: string; teacher_name?: string }, mine: boolean): string {

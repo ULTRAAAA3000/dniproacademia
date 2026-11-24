@@ -14,3 +14,14 @@ body{font-family:'Manrope',system-ui,sans-serif}
 .da-dark .da-dl{background:#374151;color:#d1d5db}
 .da-dark .da-dl--soon,.da-dark .da-dl-banner{background:#4a3a1a;color:#fbbf24}
 .da-dark .da-dl--over{background:#4a2020;color:#f87171}
+.da-calc{margin-top:16px}
+.da-calc-row{display:flex;align-items:center;gap:12px;margin-bottom:10px;flex-wrap:wrap}
+.da-calc-row .da-label{min-width:200px;margin:0}
+.da-calc-row .da-input{width:170px}
+.da-calc-result{margin-top:14px;display:flex;flex-direction:column;gap:6px}
+.da-calc-line{padding:8px 12px;border-radius:10px;background:#f2faf9;color:#2d4742;font-size:14px}
+.da-calc-line--ok{background:#e7f6ee;color:#1f6b45}
+.da-calc-line--no{background:#fdf3f2;color:#c0392b}
+.da-dark .da-calc-line{background:#374151;color:#f9fafb}
+.da-dark .da-calc-line--ok{background:#1f3a2e;color:#6ee7b7}
+.da-dark .da-calc-line--no{background:#4a2020;color:#f87171}

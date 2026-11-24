@@ -1,4 +1,5 @@
 import { api, getConfig } from "./common";
+import { runCalc } from "./calc";
 
 const CHECK_MS = 15000;
 let lastSig = "";
@@ -24,6 +25,7 @@ async function reloadContent(): Promise<void> {
     if (!fresh || !current) return;
     current.innerHTML = fresh.innerHTML;
     keepHomeworkView();
+    runCalc();
   } catch (e) {
     return;
   }
