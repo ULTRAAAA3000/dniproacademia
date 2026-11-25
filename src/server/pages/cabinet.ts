@@ -310,10 +310,10 @@ function calcPanel(avgs: { subject: string; total: number; cnt: number }[]): str
     options += '<option value="' + i + '" data-sum="' + avgs[i].total + '" data-count="' + avgs[i].cnt + '">' + esc(avgs[i].subject) + "</option>";
   }
   return (
-    '<div class="da-panel da-calc"><h2 class="da-panel-title">Калькулятор цілі</h2>' +
+    '<div class="da-panel da-calc"><h2 class="da-panel-title">Калькулятор оцінок</h2>' +
     '<div class="da-calc-row"><label class="da-label">Предмет</label><select class="da-input" id="da-calc-subject">' + options + "</select></div>" +
-    '<div class="da-calc-row"><label class="da-label">Бажаний середній бал</label><input type="number" class="da-input" id="da-calc-goal" min="1" max="12" step="0.1"></div>' +
-    '<div class="da-calc-row"><label class="da-label">А якщо отримаю оцінку</label><input type="number" class="da-input" id="da-calc-what" min="1" max="12" step="1" placeholder="1-12"></div>' +
+    '<div class="da-calc-row"><label class="da-label">Який середній бал потрібен</label><input type="number" class="da-input" id="da-calc-goal" min="1" max="12" step="0.1"></div>' +
+    '<div class="da-calc-row"><label class="da-label">А якщо отримати оцінку</label><input type="number" class="da-input" id="da-calc-what" min="1" max="12" step="1" placeholder="1-12"></div>' +
     '<div class="da-calc-result" id="da-calc-result"></div></div>'
   );
 }
