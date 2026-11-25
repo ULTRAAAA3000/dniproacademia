@@ -25,18 +25,18 @@ export function runCalc(): void {
     goalInput.dataset.subject = select.value;
   }
 
-  let html = line("Зараз: " + avg.toFixed(1) + " (оцінок: " + count + ")", "info");
+  let html = line("Зараз середній бал: " + avg.toFixed(1) + " (оцінок: " + count + ")", "info");
 
   const goal = Number(goalInput.value);
   if (goal >= 1 && goal <= 12) {
     if (avg >= goal) {
-      html += line("Ціль уже досягнута", "ok");
+      html += line("Цей бал уже досягнуто", "ok");
     } else {
       for (let k = 1; k <= 5; k++) {
         const need = Math.ceil(((goal * (count + k) - sum) / k) * 10) / 10;
         const text = "Ще " + k + " " + WORDS[k - 1] + ": ";
-        if (need > 12) html += line(text + "недосяжно (треба " + need.toFixed(1) + ")", "no");
-        else html += line(text + "у середньому " + need.toFixed(1), "ok");
+        if (need > 12) html += line(text + "не вийде", "no");
+        else html += line(text + "треба в середньому " + need.toFixed(1), "ok");
       }
     }
   }
@@ -47,7 +47,7 @@ export function runCalc(): void {
     const diff = next - avg;
     let sign = "";
     if (diff >= 0) sign = "+";
-    html += line("З оцінкою " + what + " середній стане " + next.toFixed(1) + " (" + sign + diff.toFixed(1) + ")", "info");
+    html += line("Якщо отримати " + what + ", середній буде " + next.toFixed(1) + " (" + sign + diff.toFixed(1) + ")", "info");
   }
 
   result.innerHTML = html;
